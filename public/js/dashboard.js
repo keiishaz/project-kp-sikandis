@@ -14,6 +14,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize active menu highlighting
     initActiveMenu();
+
+    initModals();
     
 });
 
@@ -25,6 +27,42 @@ function initDashboard() {
     
     // Add smooth scroll behavior
     document.documentElement.style.scrollBehavior = 'smooth';
+}
+
+function initModals() {
+    const openers = document.querySelectorAll('[data-modal-open]');
+    const closers = document.querySelectorAll('[data-modal-close]');
+
+    openers.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-modal-open');
+            const overlay = document.getElementById(id);
+            if (overlay) overlay.classList.add('active');
+        });
+    });
+
+    closers.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-modal-close');
+            const overlay = document.getElementById(id);
+            if (overlay) overlay.classList.remove('active');
+        });
+    });
+
+    document.addEventListener('click', (e) => {
+        const target = e.target;
+        if (target && target.classList && target.classList.contains('modal-overlay')) {
+            target.classList.remove('active');
+        }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal-overlay.active').forEach(overlay => {
+                overlay.classList.remove('active');
+            });
+        }
+    });
 }
 
 /**
