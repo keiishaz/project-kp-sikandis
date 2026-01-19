@@ -188,8 +188,14 @@ class KendaraanController extends Controller
         $huruf = strtoupper(trim((string) ($data['no_polisi_huruf'] ?? '')));
         $data['no_polisi'] = trim($wilayah . ' ' . $angka . ' ' . $huruf);
 
+        // Pre-fill placeholder QR if missing (since we removed input but DB requires it)
+        if (empty($data['kode_qr'])) {
+             // Use a placeholder or unique ID so DB insertion doesn't fail.
+            $data['kode_qr'] = 'PENDING-' . uniqid(); 
+        }
+
         $validated = Validator::make($data, [
-            'kode_qr' => ['required', 'string', 'max:255'],
+            'kode_qr' => ['nullable', 'string', 'max:255'], // changed from required
             'pemegang' => ['required', 'string', 'max:255'],
             'nip' => ['required', 'string', 'max:255'],
             'jabatan' => ['required', 'string', 'max:255'],
@@ -204,10 +210,12 @@ class KendaraanController extends Controller
             'no_mesin' => ['required', 'string', 'max:255'],
             'pajak_bulan' => ['required', 'integer', 'between:1,12'],
             'pajak_tahun' => ['required', 'integer', 'min:2000', 'max:2100'],
-            'jenis' => ['required', 'in:operasional,jabatan'],
+            'jenis' => ['required', 'in:jabatan,operasional'],
+            'lokasi' => ['nullable', 'string', 'required_if:jenis,operasional'],
         ], [
             'no_polisi.unique' => 'Nomor Polisi sudah terdaftar. Silakan gunakan nomor yang lain.',
-            'jenis.in' => 'Jenis harus Operasional atau Jabatan.',
+            'jenis.in' => 'Jenis harus Kendaraan Dinas Jabatan atau Operasional.',
+            'lokasi.required_if' => 'Lokasi wajib diisi untuk Kendaraan Dinas Operasional.',
             'no_polisi_wilayah.required' => 'Wilayah (huruf) wajib diisi.',
             'no_polisi_wilayah.regex' => 'Wilayah harus huruf 1-3 karakter (contoh: B atau BD).',
             'no_polisi_angka.required' => 'Nomor (angka) wajib diisi.',
@@ -218,6 +226,21 @@ class KendaraanController extends Controller
 
         $validated['pajak'] = sprintf('%04d-%02d', (int) $validated['pajak_tahun'], (int) $validated['pajak_bulan']);
         unset($validated['pajak_bulan'], $validated['pajak_tahun']);
+
+        // Handle Jenis Logic
+        if ($validated['jenis'] === 'jabatan') {
+            $validated['jenis'] = 'Kendaraan Dinas Jabatan';
+        } else {
+            // Operasional
+            $lokasi = trim($validated['lokasi'] ?? '');
+            $validated['jenis'] = 'Kendaraan Dinas Operasional ' . $lokasi;
+        }
+        unset($validated['lokasi']); // Remove extra field not in DB
+        
+        // Ensure kode_qr is set in validated array if it was filled by data
+        if (isset($data['kode_qr']) && !isset($validated['kode_qr'])) {
+             $validated['kode_qr'] = $data['kode_qr'];
+        }
 
         unset($validated['no_polisi_wilayah'], $validated['no_polisi_angka'], $validated['no_polisi_huruf']);
 
