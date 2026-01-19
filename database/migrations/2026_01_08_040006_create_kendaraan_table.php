@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('kendaraan', function (Blueprint $table) {
             $table->id();
-            $table->string('kode_qr');
+            $table->string('kode_qr')->unique()->nullable();
             $table->string('pemegang');
             $table->string('nip');
             $table->string('jabatan');

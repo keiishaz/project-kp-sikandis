@@ -166,6 +166,7 @@ class KendaraanController extends Controller
     public function store(Request $request)
     {
         $validated = $this->validateKendaraan($request);
+        $validated['kode_qr'] = $this->generateKodeQr();
 
         Kendaraan::create($validated);
 
@@ -177,9 +178,13 @@ class KendaraanController extends Controller
         return view('admin.kendaraan.edit', compact('kendaraan'));
     }
 
-    public function show(Kendaraan $kendaraan)
+    public function show($id)
     {
-        return view('admin.kendaraan.show', compact('kendaraan'));
+        $kendaraan = Kendaraan::findOrFail($id);
+
+        $qrUrl = url('/') . '/' . $kendaraan->kode_qr;
+
+        return view('admin.kendaraan.show', compact('kendaraan', 'qrUrl'));
     }
 
     public function update(Request $request, Kendaraan $kendaraan)
@@ -206,15 +211,7 @@ class KendaraanController extends Controller
         $huruf = strtoupper(trim((string) ($data['no_polisi_huruf'] ?? '')));
         $data['no_polisi'] = trim($wilayah . ' ' . $angka . ' ' . $huruf);
 
-        // Pre-fill placeholder QR if missing (since we removed input but DB requires it)
-        if (empty($data['kode_qr'])) {
-             // Use a placeholder or unique ID so DB insertion doesn't fail.
-             // User will generate real QR later.
-            $data['kode_qr'] = 'PENDING-' . uniqid(); 
-        }
-
         $validated = Validator::make($data, [
-            'kode_qr' => ['nullable', 'string', 'max:255'], // changed from required
             'pemegang' => ['required', 'string', 'max:255'],
             'nip' => ['required', 'string', 'max:255'],
             'jabatan' => ['required', 'string', 'max:255'],
@@ -265,4 +262,37 @@ class KendaraanController extends Controller
 
         return $validated;
     }
+
+    private function generateKodeQR(): string
+    {
+        $part1 = strtoupper(substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, 3));
+        $part2 = strtoupper(substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, 3));
+
+        $kode = "{$part1}-{$part2}";
+
+        while (Kendaraan::where('kode_qr', $kode)->exists()) {
+            $part1 = strtoupper(substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, 3));
+            $part2 = strtoupper(substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, 3));
+            $kode = "{$part1}-{$part2}";
+        }
+
+        return $kode;
+    }
+
+    public function printQr(Kendaraan $kendaraan)
+{
+    return view('admin.kendaraan.print-qr', compact('kendaraan'));
+}
+
+
+    public function regenerateQR(Kendaraan $kendaraan)
+    {
+        $kendaraan->update([
+            'kode_qr' => $this->generateKodeQR()
+        ]);
+
+        return redirect()->back()->with('success', 'Kode QR berhasil diperbarui!');
+    }
+
+    
 }

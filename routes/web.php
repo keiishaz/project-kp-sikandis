@@ -1,12 +1,13 @@
 <?php
 
-use App\Http\Controllers\Admin\KendaraanController as AdminKendaraanController;
-use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
-use App\Http\Controllers\Admin\OperatorController;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Admin\OperatorController;
+use App\Http\Controllers\PublicKendaraanController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\KendaraanController as AdminKendaraanController;
 use App\Http\Controllers\Operator\DashboardController as OperatorDashboardController;
 use App\Http\Controllers\Operator\KendaraanController as OperatorKendaraanController;
-use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -26,6 +27,8 @@ Route::prefix('admin')
         Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
 
         Route::get('kendaraan/export-excel', [AdminKendaraanController::class, 'exportExcel'])->name('kendaraan.export');
+        Route::post('kendaraan/{kendaraan}/regenerate-qr', [AdminKendaraanController::class, 'regenerateQr'])->name('kendaraan.regenerate');
+        Route::get('kendaraan/{kendaraan}/print-qr', [AdminKendaraanController::class, 'printQr'])->name('kendaraan.print');
         Route::resource('kendaraan', AdminKendaraanController::class);
         Route::resource('kelola-operator', OperatorController::class)->except(['show']);
     });
@@ -39,3 +42,8 @@ Route::prefix('operator')
         Route::get('kendaraan/export-excel', [OperatorKendaraanController::class, 'exportExcel'])->name('kendaraan.export');
         Route::resource('kendaraan', OperatorKendaraanController::class);
     });
+
+Route::get('/{kode_qr}', [PublicKendaraanController::class, 'show'])
+    ->name('umum.public');
+
+

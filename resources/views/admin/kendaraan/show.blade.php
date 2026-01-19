@@ -1,5 +1,9 @@
 @extends('layouts.dashboard')
 
+@php
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
+@endphp
+
 @section('title', 'Admin - Detail Kendaraan')
 @section('topbar_title', 'Detail Kendaraan')
 
@@ -14,12 +18,33 @@
                 <a class="btn btn-primary btn-sm" href="{{ route('admin.kendaraan.edit', $kendaraan) }}">Edit</a>
             </div>
         </div>
+    <div style="margin-bottom: 20px; text-align: center;">
+    <h4>QR Code Kendaraan</h4>
+
+    <div style="margin: 10px 0;">
+            {!! QrCode::size(200)->generate($qrUrl) !!}
+        </div>
+
+        <small>
+            Link QR: 
+            <a href="{{ $qrUrl }}" target="_blank">
+                {{ $qrUrl }}
+            </a>
+        </small>
+        <br>
+        <form action="{{ route('admin.kendaraan.regenerate', $kendaraan) }}" method="POST" style="display:inline;">
+            @csrf
+            <button type="submit" class="btn btn-warning btn-sm">
+                Generate QR Baru
+            </button>
+        </form>
+        <a href="{{ route('admin.kendaraan.print', $kendaraan->id) }}" target="_blank" class="btn btn-warning btn-sm">
+            Cetak QR
+        </a>
+    </div>
+
 
         <div class="detail-grid">
-            <div class="detail-row">
-                <div class="detail-key">Kode QR</div>
-                <div class="detail-value">{{ $kendaraan->kode_qr }}</div>
-            </div>
             <div class="detail-row">
                 <div class="detail-key">Jenis</div>
                 <div class="detail-value">{{ $kendaraan->jenis }}</div>
