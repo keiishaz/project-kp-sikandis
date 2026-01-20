@@ -77,4 +77,17 @@ class Kendaraan extends Model
 
         return now()->lessThanOrEqualTo($expiry);
     }
+
+    public function getPajakIsExpiringSoonAttribute(): bool
+    {
+        if (!is_string($this->pajak)) {
+            return false;
+        }
+        
+        // Cek jika bulan ini atau bulan depan
+        $currentMonth = now()->format('Y-m');
+        $nextMonth = now()->addMonth()->format('Y-m');
+        
+        return in_array($this->pajak, [$currentMonth, $nextMonth]);
+    }
 }

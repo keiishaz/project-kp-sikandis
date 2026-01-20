@@ -47,6 +47,10 @@ class KendaraanController extends Controller
             } else {
                 $query->whereRaw("STR_TO_DATE(CONCAT(pajak,'-01'), '%Y-%m-%d') < DATE_FORMAT(CURDATE(), '%Y-%m-01')");
             }
+        } elseif ($status === 'hampir_habis') {
+            $currentMonth = now()->format('Y-m');
+            $nextMonth = now()->addMonth()->format('Y-m');
+            $query->whereIn('pajak', [$currentMonth, $nextMonth]);
         }
 
         $allowedSorts = ['created_at', 'kode_qr', 'nama_kendaraan', 'no_polisi', 'jenis', 'pemegang', 'pajak'];

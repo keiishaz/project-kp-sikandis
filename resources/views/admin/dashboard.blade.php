@@ -40,6 +40,23 @@
             <div class="summary-value">{{ $pajakMati }}</div>
             <div class="summary-label">Kendaraan Pajak Mati</div>
         </div>
+
+        @if(isset($pajakAkanMati) && $pajakAkanMati > 0)
+        <a href="{{ route('admin.kendaraan.index', ['status' => 'hampir_habis']) }}" style="text-decoration: none; color: inherit;">
+            <div class="summary-card">
+                <div class="summary-header">
+                    <div class="summary-icon" style="color: #f59e0b; background: #fef3c7;">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M11.99 2C6.47 2 2 6.48 2 12C2 17.52 6.47 22 11.99 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 11.99 2ZM12 16.5C11.17 16.5 10.5 15.83 10.5 15C10.5 14.17 11.17 13.5 12 13.5C12.83 13.5 13.5 14.17 13.5 15C13.5 15.83 12.83 16.5 12 16.5ZM13 12H11V7H13V12Z" fill="currentColor"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="summary-value">{{ $pajakAkanMati }}</div>
+                <div class="summary-label">Pajak Segera Jatuh Tempo</div>
+                <div style="font-size: 0.75rem; color: #f59e0b; margin-top: 0.5rem;">Klik untuk detail</div>
+            </div>
+        </a>
+        @endif
     </section>
 
     <section class="table-container">

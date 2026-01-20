@@ -24,8 +24,13 @@ class DashboardController extends Controller
             $pajakMati = Kendaraan::whereRaw("STR_TO_DATE(CONCAT(pajak,'-01'), '%Y-%m-%d') < DATE_FORMAT(CURDATE(), '%Y-%m-01')")->count();
         }
 
+        // Logic Pajak Akan Mati (Bulan ini atau Bulan Depan)
+        $currentMonth = now()->format('Y-m');
+        $nextMonth = now()->addMonth()->format('Y-m');
+        $pajakAkanMati = Kendaraan::whereIn('pajak', [$currentMonth, $nextMonth])->count();
+
         $latest = Kendaraan::latest()->take(7)->get();
 
-        return view('admin.dashboard', compact('total', 'pajakAktif', 'pajakMati', 'latest'));
+        return view('admin.dashboard', compact('total', 'pajakAktif', 'pajakMati', 'pajakAkanMati', 'latest'));
     }
 }

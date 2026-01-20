@@ -82,7 +82,12 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
                             </div>
                             <div>
                                 <span style="display: block; font-size: 0.8rem; color: var(--gray-500);">Jatuh Tempo Pajak</span>
-                                <span style="font-weight: 500;">{{ $kendaraan->pajak_label }}</span>
+                                <div style="font-weight: 500; display: flex; align-items: center; margin-top: 0.25rem;">
+                                    {{ $kendaraan->pajak_label }}
+                                    @if($kendaraan->pajak_is_expiring_soon)
+                                        <span class="status-badge" style="background: #fef3c7; color: #b45309; margin-left: 8px; border: none;">Segera Jatuh Tempo</span>
+                                    @endif
+                                </div>
                             </div>
                             <div>
                                 <span style="display: block; font-size: 0.8rem; color: var(--gray-500);">Status Pajak</span>

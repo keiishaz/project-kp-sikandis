@@ -7,9 +7,9 @@
     <section class="table-container">
         <div class="table-header">
             <h3 class="table-title">Data Kendaraan</h3>
-            <div class="table-header-actions">
+            <div class="table-header-actions" style="display: flex; gap: 0.5rem; flex-direction: row; align-items: center;">
                 <a href="{{ route('admin.kendaraan.create') }}" class="btn btn-primary">Tambah</a>
-                <a class="btn btn-sm" href="{{ route('admin.kendaraan.export', request()->query()) }}">Export Excel</a>
+                <a href="{{ route('admin.kendaraan.export', request()->query()) }}" class="btn">Export Excel</a>
             </div>
         </div>
 
