@@ -5,177 +5,173 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Login - SIKANDIS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --blue-900: #0b1220;
-            --blue-800: #0f172a;
-            --blue-700: #1d4ed8;
-            --blue-600: #2563eb;
-            --blue-500: #3b82f6;
-            --slate-700: #334155;
-            --slate-600: #475569;
-            --slate-300: #cbd5e1;
-            --slate-200: #e2e8f0;
-            --white: #ffffff;
-            --shadow: 0 24px 80px rgba(15, 23, 42, 0.22);
+            /* System Theme Colors */
+            --primary: #1e3a8a;       /* Blue 900 */
+            --primary-hover: #1e40af; /* Blue 800 */
+            --accent: #3b82f6;        /* Blue 500 */
+            --bg-body: #f8fafc;       /* Slate 50 */
+            --bg-card: #ffffff;
+            --text-main: #1e293b;     /* Slate 800 */
+            --text-muted: #64748b;    /* Slate 500 */
+            --border: #e2e8f0;        /* Slate 200 */
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --focus-ring: rgba(59, 130, 246, 0.5);
         }
 
-        * { box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 24px;
-            background:
-                radial-gradient(1100px 520px at 10% 10%, rgba(59, 130, 246, 0.18) 0%, rgba(59, 130, 246, 0) 60%),
-                radial-gradient(900px 480px at 90% 20%, rgba(37, 99, 235, 0.14) 0%, rgba(37, 99, 235, 0) 55%),
-                linear-gradient(135deg, #0b1220 0%, #0f172a 45%, #0b1220 100%);
+            padding: 1.5rem;
+            /* Subtle Background Pattern */
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 24px 24px;
         }
 
-        .card {
+        .login-card {
+            background: var(--bg-card);
             width: 100%;
-            max-width: 440px;
-            background: rgba(15, 23, 42, 0.92);
-            border-radius: 18px;
-            padding: 22px;
-            box-shadow: var(--shadow);
-            border: 1px solid rgba(148, 163, 184, 0.25);
-            overflow: hidden;
-            position: relative;
+            max-width: 400px;
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            border: 1px solid var(--border);
+            text-align: center;
         }
 
-        .card:before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(180deg, rgba(37, 99, 235, 0.10) 0%, rgba(37, 99, 235, 0) 55%);
-            pointer-events: none;
+        .brand-logo {
+            margin-bottom: 1.5rem;
         }
 
-        .brand {
-            position: relative;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 12px;
+        .brand-logo img {
+            height: 64px; /* Adjust size as needed */
+            width: auto;
+            object-fit: contain;
         }
 
-        .brand-mark {
-            width: 42px;
-            height: 42px;
-            border-radius: 12px;
-            background: linear-gradient(180deg, var(--blue-600) 0%, var(--blue-700) 100%);
-            box-shadow: 0 10px 28px rgba(37, 99, 235, 0.28);
+        .login-header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
         }
 
-        h1 {
-            margin: 0;
-            font-size: 18px;
-            color: rgba(255, 255, 255, 0.95);
-            letter-spacing: 0.2px;
+        .login-header p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
         }
 
-        p {
-            margin: 0 0 16px;
-            color: rgba(226, 232, 240, 0.78);
-            font-size: 13px;
-            position: relative;
+        .form-group {
+            margin-bottom: 1.25rem;
+            text-align: left;
         }
 
-        .field { margin-bottom: 12px; position: relative; }
-        label { display: block; font-size: 12px; color: var(--slate-600); margin-bottom: 6px; font-weight: 700; }
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+        }
 
         input {
             width: 100%;
-            padding: 11px 12px;
-            border: 1px solid rgba(148, 163, 184, 0.35);
-            border-radius: 12px;
-            outline: none;
-            transition: box-shadow 160ms ease, border-color 160ms ease;
-            background: rgba(2, 6, 23, 0.55);
-            color: rgba(255, 255, 255, 0.92);
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            background-color: #fff;
+            color: var(--text-main);
         }
 
         input:focus {
-            border-color: var(--blue-500);
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.18);
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--focus-ring);
         }
 
-        .btn {
+        .btn-login {
             width: 100%;
-            padding: 11px 12px;
-            border: 0;
-            border-radius: 12px;
-            background: linear-gradient(180deg, var(--blue-600) 0%, var(--blue-700) 100%);
-            color: #fff;
+            padding: 0.875rem;
+            background-color: var(--primary);
+            color: white;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: none;
+            border-radius: 8px;
             cursor: pointer;
-            font-weight: 800;
-            letter-spacing: 0.2px;
-            transition: transform 120ms ease, box-shadow 160ms ease;
-            box-shadow: 0 14px 34px rgba(37, 99, 235, 0.25);
+            transition: background-color 0.2s;
+            margin-top: 0.5rem;
         }
 
-        .btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 18px 46px rgba(37, 99, 235, 0.30);
+        .btn-login:hover {
+            background-color: var(--primary-hover);
         }
 
-        .error {
-            color: #dc2626;
-            font-size: 12px;
-            margin-top: 6px;
-            font-weight: 700;
+        .error-message {
+            color: #ef4444;
+            font-size: 0.8rem;
+            margin-top: 0.35rem;
         }
 
-        .hint {
-            margin-top: 14px;
-            font-size: 12px;
-            color: rgba(226, 232, 240, 0.78);
-            padding: 0;
-            border-radius: 0;
-            border: 0;
-            background: transparent;
-            position: relative;
+        .footer-text {
+            margin-top: 2rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            border-top: 1px dashed var(--border);
+            padding-top: 1rem;
         }
-
-        code { background: rgba(148, 163, 184, 0.16); color: rgba(255, 255, 255, 0.9); padding: 2px 6px; border-radius: 8px; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <div class="brand">
-            <div class="brand-mark"></div>
-            <div>
-                <h1>Login SIKANDIS</h1>
-                <p>Masuk sebagai admin atau operator.</p>
-            </div>
+
+    <div class="login-card">
+        <div class="brand-logo">
+            <img src="{{ asset('assets/images/logo-kominfo.png') }}" alt="Logo Kominfo">
+        </div>
+        
+        <div class="login-header">
+            <h1>SIKANDIS</h1>
+            <p>Sistem Informasi Data Kendaraan Dinas</p>
         </div>
 
         <form method="POST" action="{{ route('login.submit') }}">
             @csrf
 
-            <div class="field">
+            <div class="form-group">
                 <label for="login">Username / Email</label>
-                <input id="login" name="login" type="text" value="{{ old('login') }}" required autofocus>
+                <input id="login" name="login" type="text" value="{{ old('login') }}" placeholder="Masukkan username/email" required autofocus>
                 @error('login')
-                    <div class="error">{{ $message }}</div>
+                    <div class="error-message">{{ $message }}</div>
                 @enderror
             </div>
 
-            <div class="field">
+            <div class="form-group">
                 <label for="password">Password</label>
-                <input id="password" name="password" type="password" required>
+                <input id="password" name="password" type="password" placeholder="Masukkan password" required>
                 @error('password')
-                    <div class="error">{{ $message }}</div>
+                    <div class="error-message">{{ $message }}</div>
                 @enderror
             </div>
 
-            <button type="submit" class="btn">Login</button>
+            <button type="submit" class="btn-login">Masuk</button>
         </form>
+
+        <div class="footer-text">
+            &copy; {{ date('Y') }} Dinas Kominfo Kota Bengkulu
+        </div>
     </div>
+
 </body>
 </html>
