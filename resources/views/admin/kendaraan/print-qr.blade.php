@@ -5,51 +5,29 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Cetak QR - {{ $kendaraan->kode_qr }}</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-        }
-
-        .print-container {
-            margin-top: 40px;
-        }
-
-        .qr-box {
-            display: inline-block;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-        }
-
-        .plat {
-            margin-top: 10px;
-            font-weight: bold;
-            font-size: 18px;
-        }
-
-        @media print {
-            .no-print {
-                display: none;
-            }
-        }
-    </style>
+    <title>Cetak QR - {{ $kendaraan->no_polisi }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/print-qr.css') }}">
 </head>
 <body>
 
-    <button onclick="window.print()" class="no-print">
-        Cetak QR
-    </button>
+    <div class="no-print">
+        <a href="{{ route('admin.kendaraan.index') }}" class="btn-back">Kembali</a>
+        <button id="printBtn" class="btn-print">Cetak Stiker</button>
+    </div>
 
-    <div class="print-container">
-        <div class="qr-box">
-            {!! QrCode::size(250)->generate(url($kendaraan->kode_qr)) !!}
-            <div class="plat">
-                {{ $kendaraan->nomor_kendaraan }}
+    <div class="sticker-card">
+        <div class="qr-area">
+            <div class="qr-wrapper">
+                {!! QrCode::size(200)->style('round')->generate(url($kendaraan->kode_qr)) !!}
             </div>
+        </div>
+
+        <div class="card-footer">
+            <div class="app-brand">ASET KENDARAAN DINAS</div>
         </div>
     </div>
 
+    <script src="{{ asset('js/print-qr.js') }}"></script>
 </body>
 </html>

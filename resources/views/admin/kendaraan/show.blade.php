@@ -103,19 +103,19 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
                         <div style="display: grid; gap: 0.75rem;">
                             <div style="display: flex; gap: 0.5rem; align-items: baseline;">
                                 <span style="width: 100px; font-size: 0.8rem; color: var(--gray-500);">Nama</span>
-                                <span style="font-weight: 600;">{{ $kendaraan->pemegang }}</span>
+                                <span style="font-weight: 600; font-size: 0.9rem;">{{ $kendaraan->pemegang }}</span>
                             </div>
                             <div style="display: flex; gap: 0.5rem; align-items: baseline;">
                                 <span style="width: 100px; font-size: 0.8rem; color: var(--gray-500);">NIP</span>
-                                <span>{{ $kendaraan->nip }}</span>
+                                <span style="font-size: 0.9rem;">{{ $kendaraan->nip }}</span>
                             </div>
                             <div style="display: flex; gap: 0.5rem; align-items: baseline;">
                                 <span style="width: 100px; font-size: 0.8rem; color: var(--gray-500);">Jabatan</span>
-                                <span>{{ $kendaraan->jabatan }}</span>
+                                <span style="font-size: 0.9rem;">{{ $kendaraan->jabatan }}</span>
                             </div>
                             <div style="display: flex; gap: 0.5rem; align-items: baseline;">
                                 <span style="width: 100px; font-size: 0.8rem; color: var(--gray-500);">Unit Kerja</span>
-                                <span>{{ $kendaraan->unit_kerja }}</span>
+                                <span style="font-size: 0.9rem;">{{ $kendaraan->unit_kerja }}</span>
                             </div>
                         </div>
                     </div>
