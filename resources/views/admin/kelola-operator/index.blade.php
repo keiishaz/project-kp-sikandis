@@ -5,20 +5,28 @@
 
 @section('content')
     <section class="table-container">
+        <!-- Header Section -->
         <div class="table-header">
             <h3 class="table-title">Kelola Operator</h3>
-            <button type="button" class="btn btn-primary" data-modal-open="modal-admin-operator-create">Tambah Operator</button>
+            <div class="table-header-actions">
+                <button type="button" class="btn btn-primary" data-modal-open="modal-admin-operator-create">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    <span>Tambah Operator</span>
+                </button>
+            </div>
         </div>
 
+        <!-- Search Toolbar (Real-time) -->
         <form class="table-toolbar" method="GET" action="{{ route('admin.kelola-operator.index') }}">
-            <div class="table-toolbar-left">
+            <div class="table-toolbar-inner">
                 <div class="toolbar-field">
-                    <input type="text" name="q" placeholder="Cari nama atau NIP" value="{{ request('q') }}">
+                    <input type="search" 
+                           name="q" 
+                           class="table-search-input" 
+                           placeholder="Cari Nama atau NIP Operator..." 
+                           value="{{ request('q') }}"
+                           autocomplete="off">
                 </div>
-            </div>
-            <div class="table-toolbar-right">
-                <button class="btn btn-sm btn-primary" type="submit">Cari</button>
-                <a class="btn btn-sm" href="{{ route('admin.kelola-operator.index') }}">Reset</a>
             </div>
         </form>
 
@@ -34,46 +42,84 @@
 
             $sortIndicator = function (string $key) use ($currentSort, $currentDir) {
                 if ($currentSort !== $key) return '';
-                return $currentDir === 'asc' ? '▲' : '▼';
+                return $currentDir === 'asc' ? ' ▲' : ' ▼';
             };
         @endphp
 
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th><a class="sort-link" href="{{ $sortLink('name') }}">Nama <span class="sort-indicator">{{ $sortIndicator('name') }}</span></a></th>
-                    <th><a class="sort-link" href="{{ $sortLink('nip') }}">NIP <span class="sort-indicator">{{ $sortIndicator('nip') }}</span></a></th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($operators as $op)
+        <!-- Data Table -->
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
                     <tr>
-                        <td class="font-semibold">{{ $op->name }}</td>
-                        <td>{{ $op->nip }}</td>
-                        <td>
-                            <a class="btn btn-primary btn-sm" href="{{ route('admin.kelola-operator.edit', $op) }}">Edit</a>
-                            <form method="POST" action="{{ route('admin.kelola-operator.destroy', $op) }}" style="display:inline;">
-                                @csrf
-                                @method('DELETE')
-                                <button
-                                    class="btn btn-danger btn-sm"
-                                    type="submit"
-                                    onclick="return confirm('Data operator akan dihapus permanen.\nTindakan ini tidak dapat dibatalkan.\n\nApakah Anda yakin ingin melanjutkan?');">
-                                    Hapus
-                                </button>
-                            </form>
-                        </td>
+                        <th class="col-name">
+                            <a class="sort-link" href="{{ $sortLink('name') }}">
+                                Nama Operator <span class="sort-indicator">{{ $sortIndicator('name') }}</span>
+                            </a>
+                        </th>
+                        <th class="col-nip">
+                            <a class="sort-link" href="{{ $sortLink('nip') }}">
+                                NIP <span class="sort-indicator">{{ $sortIndicator('nip') }}</span>
+                            </a>
+                        </th>
+                        <th class="col-actions">Aksi</th>
                     </tr>
-                @empty
-                    <tr>
-                        <td colspan="3">Belum ada operator.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @forelse($operators as $op)
+                        <tr>
+                            <!-- Nama -->
+                            <td class="col-name" data-label="Nama Operator">
+                                <div class="font-semibold text-gray-800">{{ $op->name }}</div>
+                            </td>
+                            
+                            <!-- NIP -->
+                            <td class="col-nip" data-label="NIP">
+                                <span class="text-sm font-medium text-gray-600">{{ $op->nip }}</span>
+                            </td>
+                            
+                            <!-- Actions -->
+                            <td class="col-actions" data-label="Aksi">
+                                <div class="action-buttons">
+                                    <a href="{{ route('admin.kelola-operator.edit', $op) }}" class="btn-action btn-edit" title="Edit">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                        </svg>
+                                    </a>
+                                    <form action="{{ route('admin.kelola-operator.destroy', $op) }}" method="POST" style="display:inline;" onsubmit="return confirm('Hapus data operator ini? Tindakan ini tidak dapat dibatalkan.');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn-action btn-delete" title="Hapus">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <polyline points="3 6 5 6 21 6"></polyline>
+                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="3" class="empty-state">
+                                <div class="empty-content">
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                                        <line x1="12" y1="16" x2="12" y2="16"></line>
+                                    </svg>
+                                    <p>Data operator tidak ditemukan.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
 
-        {{ $operators->links('pagination.sikandis') }}
+        <div class="pagination-wrapper">
+            {{ $operators->links('pagination.sikandis') }}
+        </div>
     </section>
 
     <div class="modal-overlay {{ $errors->any() ? 'active' : '' }}" id="modal-admin-operator-create">
