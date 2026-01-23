@@ -60,46 +60,69 @@
     <section class="table-container">
         <div class="table-header">
             <h3 class="table-title">Data Kendaraan Terbaru</h3>
-            <a href="{{ route('operator.kendaraan.index') }}">Lihat Semua</a>
+            <a href="{{ route('operator.kendaraan.index') }}" class="btn btn-sm btn-outline">Lihat Semua</a>
         </div>
 
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>Kode QR</th>
-                    <th>Nama Kendaraan</th>
-                    <th>No Polisi</th>
-                    <th>Jenis</th>
-                    <th>Pemegang</th>
-                    <th class="col-pajak">Pajak</th>
+                    <th class="col-kendaraan">Kendaraan</th>
+                    <th class="col-pemegang">Pemegang</th>
+                    <th class="col-jenis">Jenis</th>
+                    <th class="col-pajak">Status</th>
                     <th class="col-actions">Aksi</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($latest as $k)
                     <tr>
-                        <td>{{ $k->kode_qr }}</td>
-                        <td class="font-semibold">{{ $k->nama_kendaraan }}</td>
-                        <td>{{ $k->no_polisi }}</td>
-                        <td>{{ ucfirst($k->jenis) }}</td>
-                        <td>{{ $k->pemegang }}</td>
-                        <td class="col-pajak">
-                            <div class="pajak-info">
-                                <span>{{ $k->pajak_label }}</span>
-                                <span class="status-badge {{ $k->pajak_is_active ? 'active' : 'inactive' }}">
-                                    {{ $k->pajak_is_active ? 'Aktif' : 'Tidak Aktif' }}
-                                </span>
+                        <!-- Kendaraan -->
+                        <td class="col-kendaraan" data-label="Kendaraan">
+                            <div class="vehicle-info">
+                                <div class="vehicle-plate">{{ $k->no_polisi }}</div>
+                                <div class="vehicle-name">{{ $k->nama_kendaraan }}</div>
                             </div>
                         </td>
-                        <td class="col-actions">
+                        
+                        <!-- Pemegang -->
+                        <td class="col-pemegang" data-label="Pemegang">
+                            <div class="holder-text font-semibold">{{ $k->pemegang }}</div>
+                            <div class="text-xs text-gray-500">{{ $k->jabatan }}</div>
+                        </td>
+                        
+                        <!-- Jenis -->
+                        <td class="col-jenis" data-label="Jenis">
+                            <span class="type-badge">
+                                {{ ucfirst($k->jenis == 'Kendaraan Dinas Jabatan' ? 'Jabatan' : 'Operasional') }}
+                            </span>
+                        </td>
+                        
+                        <!-- Status Pajak -->
+                        <td class="col-pajak" data-label="Status Pajak">
+                            <span class="status-badge {{ $k->pajak_is_active ? 'active' : 'inactive' }}">
+                                {{ $k->pajak_is_active ? 'HIDUP' : 'MATI' }}
+                            </span>
+                        </td>
+                        
+                        <!-- Actions -->
+                        <td class="col-actions" data-label="Aksi">
                             <div class="action-buttons">
-                                <a class="btn btn-sm" href="{{ route('operator.kendaraan.show', $k) }}">Detail</a>
+                                <a href="{{ route('operator.kendaraan.show', $k) }}" class="btn-action btn-detail" title="Detail">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
+                                </a>
                             </div>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7">Belum ada data kendaraan.</td>
+                        <td colspan="5" class="empty-state">
+                            <div class="empty-content">
+                                <p>Belum ada data kendaraan.</p>
+                            </div>
+                        </td>
                     </tr>
                 @endforelse
             </tbody>

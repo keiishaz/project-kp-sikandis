@@ -203,7 +203,7 @@
         </form>
 
         <div class="footer-text">
-            &copy; {{ date('Y') }} Dinas Kominfo Kota Bengkulu
+            &copy; {{ date('Y') }} TIM MAGANG PROJECT SIKANDIS
         </div>
     </div>
 

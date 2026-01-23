@@ -17,6 +17,7 @@ class KendaraanController extends Controller
     {
         $q = request()->query('q');
         $status = request()->query('status');
+        $jenis = request()->query('jenis');
         $sort = request()->query('sort');
         $dir = request()->query('dir');
 
@@ -32,40 +33,76 @@ class KendaraanController extends Controller
             });
         }
 
-        if ($status === 'aktif') {
-            $driver = DB::connection()->getDriverName();
-            if ($driver === 'sqlite') {
-                $query->whereRaw("date(pajak || '-01') >= date('now','start of month')");
-            } elseif ($driver === 'pgsql') {
-                $query->whereRaw("to_date(pajak || '-01', 'YYYY-MM-DD') >= date_trunc('month', now())::date");
-            } else {
-                $query->whereRaw("STR_TO_DATE(CONCAT(pajak,'-01'), '%Y-%m-%d') >= DATE_FORMAT(CURDATE(), '%Y-%m-01')");
-            }
-        } elseif ($status === 'mati') {
-            $driver = DB::connection()->getDriverName();
-            if ($driver === 'sqlite') {
-                $query->whereRaw("date(pajak || '-01') < date('now','start of month')");
-            } elseif ($driver === 'pgsql') {
-                $query->whereRaw("to_date(pajak || '-01', 'YYYY-MM-DD') < date_trunc('month', now())::date");
-            } else {
-                $query->whereRaw("STR_TO_DATE(CONCAT(pajak,'-01'), '%Y-%m-%d') < DATE_FORMAT(CURDATE(), '%Y-%m-01')");
-            }
-        } elseif ($status === 'hampir_habis') {
-             $currentMonth = now()->format('Y-m');
-             $nextMonth = now()->addMonth()->format('Y-m');
-             $query->whereIn('pajak', [$currentMonth, $nextMonth]);
+        // Jenis filter
+        if (is_string($jenis) && trim($jenis) !== '') {
+            $query->where('jenis', 'like', '%' . trim($jenis) . '%');
         }
 
-        $allowedSorts = ['created_at', 'kode_qr', 'nama_kendaraan', 'no_polisi', 'jenis', 'pemegang', 'pajak'];
-        $direction = in_array($dir, ['asc', 'desc'], true) ? $dir : 'desc';
+        // Status filtering - use get() + filter for hampir_habis, otherwise use query builder
+        if ($status === 'hampir_habis') {
+            $allowedSorts = ['created_at', 'kode_qr', 'nama_kendaraan', 'no_polisi', 'jenis', 'pemegang', 'pajak'];
+            $direction = in_array($dir, ['asc', 'desc'], true) ? $dir : 'desc';
 
-        if (is_string($sort) && in_array($sort, $allowedSorts, true)) {
-            $query->orderBy($sort, $direction);
+            if (is_string($sort) && in_array($sort, $allowedSorts, true)) {
+                $query->orderBy($sort, $direction);
+            } else {
+                $query->latest();
+            }
+
+            $allResults = $query->get();
+            $filtered = $allResults->filter(function($k) {
+                return $k->pajak_is_expiring_soon && $k->pajak_is_active;
+            });
+
+            $perPage = 15;
+            $currentPage = request()->get('page', 1);
+            $offset = ($currentPage - 1) * $perPage;
+            
+            $paginatedItems = $filtered->slice($offset, $perPage)->values();
+            
+            $kendaraan = new \Illuminate\Pagination\LengthAwarePaginator(
+                $paginatedItems,
+                $filtered->count(),
+                $perPage,
+                $currentPage,
+                ['path' => request()->url(), 'query' => request()->query()]
+            );
         } else {
-            $query->latest();
-        }
+            if ($status === 'aktif' || $status === 'mati') {
+                $allResults = $query->get();
+                
+                if ($status === 'aktif') {
+                    $filtered = $allResults->filter(fn($k) => $k->pajak_is_active);
+                } else {
+                    $filtered = $allResults->filter(fn($k) => !$k->pajak_is_active);
+                }
 
-        $kendaraan = $query->paginate(15)->appends(request()->query());
+                $perPage = 15;
+                $currentPage = request()->get('page', 1);
+                $offset = ($currentPage - 1) * $perPage;
+                
+                $paginatedItems = $filtered->slice($offset, $perPage)->values();
+                
+                $kendaraan = new \Illuminate\Pagination\LengthAwarePaginator(
+                    $paginatedItems,
+                    $filtered->count(),
+                    $perPage,
+                    $currentPage,
+                    ['path' => request()->url(), 'query' => request()->query()]
+                );
+            } else {
+                $allowedSorts = ['created_at', 'kode_qr', 'nama_kendaraan', 'no_polisi', 'jenis', 'pemegang', 'pajak'];
+                $direction = in_array($dir, ['asc', 'desc'], true) ? $dir : 'desc';
+
+                if (is_string($sort) && in_array($sort, $allowedSorts, true)) {
+                    $query->orderBy($sort, $direction);
+                } else {
+                    $query->latest();
+                }
+
+                $kendaraan = $query->paginate(15)->appends(request()->query());
+            }
+        }
 
         return view('operator.kendaraan.index', compact('kendaraan'));
     }

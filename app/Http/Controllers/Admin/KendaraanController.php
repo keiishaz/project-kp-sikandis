@@ -14,6 +14,7 @@ class KendaraanController extends Controller
     {
         $q = request()->query('q');
         $status = request()->query('status');
+        $jenis = request()->query('jenis');
         $sort = request()->query('sort');
         $dir = request()->query('dir');
 
@@ -29,45 +30,86 @@ class KendaraanController extends Controller
             });
         }
 
-        if ($status === 'aktif') {
-            $driver = DB::connection()->getDriverName();
-            // Logic: If pajak is YYYY-MM, treat as YYYY-MM-01. If YYYY-MM-DD, use as is.
-            if ($driver === 'sqlite') {
-                 $query->whereRaw("date(CASE WHEN length(pajak) = 7 THEN pajak || '-01' ELSE pajak END) >= date('now','start of month')");
-            } elseif ($driver === 'pgsql') {
-                 $query->whereRaw("to_date(CASE WHEN length(pajak) = 7 THEN pajak || '-01' ELSE pajak END, 'YYYY-MM-DD') >= date_trunc('month', now())::date");
-            } else {
-                 // MySQL/MariaDB
-                 $query->whereRaw("STR_TO_DATE(IF(LENGTH(pajak)=7, CONCAT(pajak, '-01'), pajak), '%Y-%m-%d') >= DATE_FORMAT(CURDATE(), '%Y-%m-01')");
-            }
-        } elseif ($status === 'mati') {
-            $driver = DB::connection()->getDriverName();
-            if ($driver === 'sqlite') {
-                 $query->whereRaw("date(CASE WHEN length(pajak) = 7 THEN pajak || '-01' ELSE pajak END) < date('now','start of month')");
-            } elseif ($driver === 'pgsql') {
-                 $query->whereRaw("to_date(CASE WHEN length(pajak) = 7 THEN pajak || '-01' ELSE pajak END, 'YYYY-MM-DD') < date_trunc('month', now())::date");
-            } else {
-                 $query->whereRaw("STR_TO_DATE(IF(LENGTH(pajak)=7, CONCAT(pajak, '-01'), pajak), '%Y-%m-%d') < DATE_FORMAT(CURDATE(), '%Y-%m-01')");
-            }
-        } elseif ($status === 'hampir_habis') {
-            // For almost expired, we check if the date falls in current or next month.
-            // Converting both DB value and range to YYYY-MM for comparison is easiest safely.
-            // SUBSTR(pajak, 1, 7) gets YYYY-MM from YYYY-MM-DD or YYYY-MM
-            $currentMonth = now()->format('Y-m');
-            $nextMonth = now()->addMonth()->format('Y-m');
-            $query->whereRaw("SUBSTR(pajak, 1, 7) IN (?, ?)", [$currentMonth, $nextMonth]);
+        // Jenis filter
+        if (is_string($jenis) && trim($jenis) !== '') {
+            $query->where('jenis', 'like', '%' . trim($jenis) . '%');
         }
 
-        $allowedSorts = ['created_at', 'kode_qr', 'nama_kendaraan', 'no_polisi', 'jenis', 'pemegang', 'pajak'];
-        $direction = in_array($dir, ['asc', 'desc'], true) ? $dir : 'desc';
+        // Status filtering - use get() + filter for hampir_habis, otherwise use query builder
+        if ($status === 'hampir_habis') {
+            // For "almost expired", we need to use model accessors
+            // Get all matching records first, then filter using accessors
+            $allowedSorts = ['created_at', 'kode_qr', 'nama_kendaraan', 'no_polisi', 'jenis', 'pemegang', 'pajak'];
+            $direction = in_array($dir, ['asc', 'desc'], true) ? $dir : 'desc';
 
-        if (is_string($sort) && in_array($sort, $allowedSorts, true)) {
-            $query->orderBy($sort, $direction);
+            if (is_string($sort) && in_array($sort, $allowedSorts, true)) {
+                $query->orderBy($sort, $direction);
+            } else {
+                $query->latest();
+            }
+
+            // Get all results first
+            $allResults = $query->get();
+            
+            // Filter using accessor
+            $filtered = $allResults->filter(function($k) {
+                return $k->pajak_is_expiring_soon && $k->pajak_is_active;
+            });
+
+            // Manually paginate the filtered collection
+            $perPage = 15;
+            $currentPage = request()->get('page', 1);
+            $offset = ($currentPage - 1) * $perPage;
+            
+            $paginatedItems = $filtered->slice($offset, $perPage)->values();
+            
+            $kendaraan = new \Illuminate\Pagination\LengthAwarePaginator(
+                $paginatedItems,
+                $filtered->count(),
+                $perPage,
+                $currentPage,
+                ['path' => request()->url(), 'query' => request()->query()]
+            );
         } else {
-            $query->latest();
-        }
+            // For aktif/mati, use query builder logic (already accurate from Model)
+            if ($status === 'aktif' || $status === 'mati') {
+                // Get all and filter using accessor
+                $allResults = $query->get();
+                
+                if ($status === 'aktif') {
+                    $filtered = $allResults->filter(fn($k) => $k->pajak_is_active);
+                } else {
+                    $filtered = $allResults->filter(fn($k) => !$k->pajak_is_active);
+                }
 
-        $kendaraan = $query->paginate(15)->appends(request()->query());
+                // Manually paginate
+                $perPage = 15;
+                $currentPage = request()->get('page', 1);
+                $offset = ($currentPage - 1) * $perPage;
+                
+                $paginatedItems = $filtered->slice($offset, $perPage)->values();
+                
+                $kendaraan = new \Illuminate\Pagination\LengthAwarePaginator(
+                    $paginatedItems,
+                    $filtered->count(),
+                    $perPage,
+                    $currentPage,
+                    ['path' => request()->url(), 'query' => request()->query()]
+                );
+            } else {
+                // No status filter
+                $allowedSorts = ['created_at', 'kode_qr', 'nama_kendaraan', 'no_polisi', 'jenis', 'pemegang', 'pajak'];
+                $direction = in_array($dir, ['asc', 'desc'], true) ? $dir : 'desc';
+
+                if (is_string($sort) && in_array($sort, $allowedSorts, true)) {
+                    $query->orderBy($sort, $direction);
+                } else {
+                    $query->latest();
+                }
+
+                $kendaraan = $query->paginate(15)->appends(request()->query());
+            }
+        }
 
         return view('admin.kendaraan.index', compact('kendaraan'));
     }

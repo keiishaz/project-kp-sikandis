@@ -56,11 +56,18 @@ class Kendaraan extends Model
             return '-';
         }
 
-        if (!preg_match('/^(\d{4})-(\d{2})$/', $this->pajak, $m)) {
-            return $this->pajak;
+        // Handle full date format (Y-m-d) -> display as d/m/Y
+        if (preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $this->pajak, $m)) {
+            return $m[3] . '/' . $m[2] . '/' . $m[1];
         }
 
-        return $m[2] . '/' . $m[1];
+        // Handle year-month format (Y-m) -> display as m/Y
+        if (preg_match('/^(\d{4})-(\d{2})$/', $this->pajak, $m)) {
+            return $m[2] . '/' . $m[1];
+        }
+
+        // Return as-is if format is unknown
+        return $this->pajak;
     }
 
     public function getPajakIsActiveAttribute(): bool
@@ -70,11 +77,22 @@ class Kendaraan extends Model
         }
 
         try {
-            $expiry = Carbon::createFromFormat('Y-m', $this->pajak)->endOfMonth();
+            // Try to parse as full date first (Y-m-d)
+            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $this->pajak)) {
+                $expiry = Carbon::createFromFormat('Y-m-d', $this->pajak);
+            } 
+            // Fall back to year-month format (Y-m)
+            elseif (preg_match('/^\d{4}-\d{2}$/', $this->pajak)) {
+                $expiry = Carbon::createFromFormat('Y-m', $this->pajak)->endOfMonth();
+            } 
+            else {
+                return false;
+            }
         } catch (\Throwable $e) {
             return false;
         }
 
+        // Tax is active if the expiry date is today or in the future
         return now()->lessThanOrEqualTo($expiry);
     }
 
@@ -84,10 +102,23 @@ class Kendaraan extends Model
             return false;
         }
         
-        // Cek jika bulan ini atau bulan depan
-        $currentMonth = now()->format('Y-m');
-        $nextMonth = now()->addMonth()->format('Y-m');
-        
-        return in_array($this->pajak, [$currentMonth, $nextMonth]);
+        try {
+            // Parse the date
+            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $this->pajak)) {
+                $expiryDate = Carbon::createFromFormat('Y-m-d', $this->pajak);
+            } elseif (preg_match('/^\d{4}-\d{2}$/', $this->pajak)) {
+                $expiryDate = Carbon::createFromFormat('Y-m', $this->pajak)->endOfMonth();
+            } else {
+                return false;
+            }
+            
+            // Check if expiry is within the next 60 days
+            $now = now();
+            $twoMonthsLater = now()->addDays(60);
+            
+            return $expiryDate->between($now, $twoMonthsLater);
+        } catch (\Throwable $e) {
+            return false;
+        }
     }
 }
