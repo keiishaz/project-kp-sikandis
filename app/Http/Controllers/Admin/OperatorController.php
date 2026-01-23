@@ -27,11 +27,11 @@ class OperatorController extends Controller
                 $q = trim($q);
                 $query->where(function ($sub) use ($q) {
                     $sub->where('name', 'like', '%' . $q . '%')
-                        ->orWhere('email', 'like', '%' . $q . '%');
+                        ->orWhere('nip', 'like', '%' . $q . '%');
                 });
             });
 
-        $allowedSorts = ['created_at', 'name', 'email'];
+        $allowedSorts = ['created_at', 'name', 'nip'];
         $direction = in_array($dir, ['asc', 'desc'], true) ? $dir : 'desc';
 
         if (is_string($sort) && in_array($sort, $allowedSorts, true)) {
@@ -54,16 +54,16 @@ class OperatorController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255', 'unique:users,name'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'nip' => ['required', 'string', 'max:20', 'unique:users,nip'],
             'password' => ['required', 'string', 'min:6'],
         ], [
-            'name.unique' => 'Username sudah digunakan. Silakan gunakan username yang lain.',
-            'email.unique' => 'Email sudah digunakan. Silakan gunakan email yang lain.',
+            'name.unique' => 'Username sudah digunakan.',
+            'nip.unique' => 'NIP sudah digunakan.',
         ]);
 
         $user = User::create([
             'name' => $validated['name'],
-            'email' => $validated['email'],
+            'nip' => $validated['nip'],
             'password' => Hash::make($validated['password']),
         ]);
 
@@ -82,15 +82,15 @@ class OperatorController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255', 'unique:users,name,' . $kelola_operator->id],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $kelola_operator->id],
+            'nip' => ['required', 'string', 'max:20', 'unique:users,nip,' . $kelola_operator->id],
             'password' => ['nullable', 'string', 'min:6'],
         ], [
-            'name.unique' => 'Username sudah digunakan. Silakan gunakan username yang lain.',
-            'email.unique' => 'Email sudah digunakan. Silakan gunakan email yang lain.',
+            'name.unique' => 'Username sudah digunakan.',
+            'nip.unique' => 'NIP sudah digunakan.',
         ]);
 
         $kelola_operator->name = $validated['name'];
-        $kelola_operator->email = $validated['email'];
+        $kelola_operator->nip = $validated['nip'];
 
         if (!empty($validated['password'])) {
             $kelola_operator->password = Hash::make($validated['password']);

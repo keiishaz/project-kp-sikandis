@@ -41,7 +41,6 @@
             <div class="summary-label">Kendaraan Pajak Mati</div>
         </div>
 
-        @if(isset($pajakAkanMati) && $pajakAkanMati > 0)
         <a href="{{ route('admin.kendaraan.index', ['status' => 'hampir_habis']) }}" style="text-decoration: none; color: inherit;">
             <div class="summary-card">
                 <div class="summary-header">
@@ -51,12 +50,11 @@
                         </svg>
                     </div>
                 </div>
-                <div class="summary-value">{{ $pajakAkanMati }}</div>
+                <div class="summary-value">{{ isset($pajakAkanMati) ? $pajakAkanMati : 0 }}</div>
                 <div class="summary-label">Pajak Segera Jatuh Tempo</div>
                 <div style="font-size: 0.75rem; color: #f59e0b; margin-top: 0.5rem;">Klik untuk detail</div>
             </div>
         </a>
-        @endif
     </section>
 
     <section class="table-container">

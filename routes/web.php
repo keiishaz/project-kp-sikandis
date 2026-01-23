@@ -9,6 +9,8 @@ use App\Http\Controllers\Admin\KendaraanController as AdminKendaraanController;
 use App\Http\Controllers\Operator\DashboardController as OperatorDashboardController;
 use App\Http\Controllers\Operator\KendaraanController as OperatorKendaraanController;
 
+use App\Http\Controllers\Admin\ActivityLogController as AdminActivityLogController;
+
 Route::get('/', function () {
     return redirect()->route('login');
 });
@@ -25,6 +27,8 @@ Route::prefix('admin')
     ->name('admin.')
     ->group(function () {
         Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+        
+        Route::get('/activity-logs', [AdminActivityLogController::class, 'index'])->name('activity_logs.index');
 
         Route::get('kendaraan/export-excel', [AdminKendaraanController::class, 'exportExcel'])->name('kendaraan.export');
         Route::post('kendaraan/{kendaraan}/regenerate-qr', [AdminKendaraanController::class, 'regenerateQr'])->name('kendaraan.regenerate');
@@ -40,6 +44,8 @@ Route::prefix('operator')
         Route::get('/', [OperatorDashboardController::class, 'index'])->name('dashboard');
 
         Route::get('kendaraan/export-excel', [OperatorKendaraanController::class, 'exportExcel'])->name('kendaraan.export');
+        Route::post('kendaraan/{kendaraan}/regenerate-qr', [OperatorKendaraanController::class, 'regenerateQr'])->name('kendaraan.regenerate');
+        Route::get('kendaraan/{kendaraan}/print-qr', [OperatorKendaraanController::class, 'printQr'])->name('kendaraan.print');
         Route::resource('kendaraan', OperatorKendaraanController::class);
     });
 

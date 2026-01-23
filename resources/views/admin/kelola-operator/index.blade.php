@@ -13,7 +13,7 @@
         <form class="table-toolbar" method="GET" action="{{ route('admin.kelola-operator.index') }}">
             <div class="table-toolbar-left">
                 <div class="toolbar-field">
-                    <input type="text" name="q" placeholder="Cari username atau email" value="{{ request('q') }}">
+                    <input type="text" name="q" placeholder="Cari nama atau NIP" value="{{ request('q') }}">
                 </div>
             </div>
             <div class="table-toolbar-right">
@@ -41,8 +41,8 @@
         <table class="data-table">
             <thead>
                 <tr>
-                    <th><a class="sort-link" href="{{ $sortLink('name') }}">Nama (username) <span class="sort-indicator">{{ $sortIndicator('name') }}</span></a></th>
-                    <th><a class="sort-link" href="{{ $sortLink('email') }}">Email <span class="sort-indicator">{{ $sortIndicator('email') }}</span></a></th>
+                    <th><a class="sort-link" href="{{ $sortLink('name') }}">Nama <span class="sort-indicator">{{ $sortIndicator('name') }}</span></a></th>
+                    <th><a class="sort-link" href="{{ $sortLink('nip') }}">NIP <span class="sort-indicator">{{ $sortIndicator('nip') }}</span></a></th>
                     <th>Aksi</th>
                 </tr>
             </thead>
@@ -50,7 +50,7 @@
                 @forelse($operators as $op)
                     <tr>
                         <td class="font-semibold">{{ $op->name }}</td>
-                        <td>{{ $op->email }}</td>
+                        <td>{{ $op->nip }}</td>
                         <td>
                             <a class="btn btn-primary btn-sm" href="{{ route('admin.kelola-operator.edit', $op) }}">Edit</a>
                             <form method="POST" action="{{ route('admin.kelola-operator.destroy', $op) }}" style="display:inline;">
@@ -88,14 +88,14 @@
 
                     <div class="form-grid">
                         <div class="form-field">
-                            <label for="op_name">Username</label>
+                            <label for="op_name">Nama</label>
                             <input id="op_name" name="name" value="{{ old('name') }}" required>
                             @error('name')<div class="error-text">{{ $message }}</div>@enderror
                         </div>
                         <div class="form-field">
-                            <label for="op_email">Email</label>
-                            <input id="op_email" name="email" type="email" value="{{ old('email') }}" required>
-                            @error('email')<div class="error-text">{{ $message }}</div>@enderror
+                            <label for="op_nip">NIP</label>
+                            <input id="op_nip" name="nip" type="text" value="{{ old('nip') }}" required>
+                            @error('nip')<div class="error-text">{{ $message }}</div>@enderror
                         </div>
                     </div>
 

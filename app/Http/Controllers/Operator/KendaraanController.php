@@ -8,6 +8,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
+use App\Models\ActivityLog;
+use Illuminate\Support\Facades\Auth;
+
 class KendaraanController extends Controller
 {
     public function index()
@@ -47,6 +50,10 @@ class KendaraanController extends Controller
             } else {
                 $query->whereRaw("STR_TO_DATE(CONCAT(pajak,'-01'), '%Y-%m-%d') < DATE_FORMAT(CURDATE(), '%Y-%m-01')");
             }
+        } elseif ($status === 'hampir_habis') {
+             $currentMonth = now()->format('Y-m');
+             $nextMonth = now()->addMonth()->format('Y-m');
+             $query->whereIn('pajak', [$currentMonth, $nextMonth]);
         }
 
         $allowedSorts = ['created_at', 'kode_qr', 'nama_kendaraan', 'no_polisi', 'jenis', 'pemegang', 'pajak'];
@@ -118,22 +125,42 @@ class KendaraanController extends Controller
         $html = "<html><head><meta charset=\"UTF-8\"></head><body>";
         $html .= "<table border=\"1\" cellpadding=\"4\" cellspacing=\"0\">";
         $html .= "<thead><tr>";
-        $html .= "<th>Kode QR</th><th>Nama Kendaraan</th><th>No Polisi</th><th>Jenis</th><th>Pemegang</th><th>Pajak</th><th>Status</th>";
+        $html .= "<th>Kode QR</th>";
+        $html .= "<th>Jenis</th>";
+        $html .= "<th>Nama Kendaraan</th>";
+        $html .= "<th>No Polisi</th>";
+        $html .= "<th>Tahun Kendaraan</th>";
+        $html .= "<th>Pajak</th>";
+        $html .= "<th>Status Pajak</th>";
+        $html .= "<th>Pemegang</th>";
+        $html .= "<th>NIP</th>";
+        $html .= "<th>Jabatan</th>";
+        $html .= "<th>Unit Kerja</th>";
+        $html .= "<th>No Rangka</th>";
+        $html .= "<th>No Mesin</th>";
         $html .= "</tr></thead><tbody>";
 
         foreach ($rows as $k) {
             $html .= "<tr>";
             $html .= "<td>" . $esc($k->kode_qr) . "</td>";
+            $html .= "<td>" . $esc($k->jenis) . "</td>";
             $html .= "<td>" . $esc($k->nama_kendaraan) . "</td>";
             $html .= "<td>" . $esc($k->no_polisi) . "</td>";
-            $html .= "<td>" . $esc(ucfirst((string) $k->jenis)) . "</td>";
-            $html .= "<td>" . $esc($k->pemegang) . "</td>";
+            $html .= "<td>" . $esc($k->thn_kendaraan) . "</td>";
             $html .= "<td>" . $esc($k->pajak_label) . "</td>";
             $html .= "<td>" . $esc($k->pajak_is_active ? 'Aktif' : 'Tidak Aktif') . "</td>";
+            $html .= "<td>" . $esc($k->pemegang) . "</td>";
+            $html .= "<td>" . $esc($k->nip) . "</td>";
+            $html .= "<td>" . $esc($k->jabatan) . "</td>";
+            $html .= "<td>" . $esc($k->unit_kerja) . "</td>";
+            $html .= "<td>" . $esc($k->no_rangka) . "</td>";
+            $html .= "<td>" . $esc($k->no_mesin) . "</td>";
             $html .= "</tr>";
         }
 
         $html .= "</tbody></table></body></html>";
+        
+        $this->logActivity('Export Excel', 'Mengexport data kendaraan ke Excel');
 
         return response($html)
             ->header('Content-Type', 'application/vnd.ms-excel; charset=UTF-8')
@@ -148,8 +175,11 @@ class KendaraanController extends Controller
     public function store(Request $request)
     {
         $validated = $this->validateKendaraan($request);
+        $validated['kode_qr'] = $this->generateKodeQr();
 
-        Kendaraan::create($validated);
+        $kendaraan = Kendaraan::create($validated);
+        
+        $this->logActivity('Tambah Kendaraan', 'Menambahkan kendaraan baru dengan No. Polisi: ' . $kendaraan->no_polisi);
 
         return redirect()->route('operator.kendaraan.index');
     }
@@ -159,9 +189,13 @@ class KendaraanController extends Controller
         return view('operator.kendaraan.edit', compact('kendaraan'));
     }
 
-    public function show(Kendaraan $kendaraan)
+    public function show($id)
     {
-        return view('operator.kendaraan.show', compact('kendaraan'));
+        $kendaraan = Kendaraan::findOrFail($id);
+
+        $qrUrl = url('/') . '/' . $kendaraan->kode_qr;
+
+        return view('operator.kendaraan.show', compact('kendaraan', 'qrUrl'));
     }
 
     public function update(Request $request, Kendaraan $kendaraan)
@@ -170,12 +204,17 @@ class KendaraanController extends Controller
 
         $kendaraan->update($validated);
 
+        $this->logActivity('Update Kendaraan', 'Memperbarui data kendaraan dengan No. Polisi: ' . $kendaraan->no_polisi);
+
         return redirect()->route('operator.kendaraan.index');
     }
 
     public function destroy(Kendaraan $kendaraan)
     {
+        $no_polisi = $kendaraan->no_polisi;
         $kendaraan->delete();
+        
+        $this->logActivity('Hapus Kendaraan', 'Menghapus kendaraan dengan No. Polisi: ' . $no_polisi);
 
         return redirect()->route('operator.kendaraan.index');
     }
@@ -188,14 +227,7 @@ class KendaraanController extends Controller
         $huruf = strtoupper(trim((string) ($data['no_polisi_huruf'] ?? '')));
         $data['no_polisi'] = trim($wilayah . ' ' . $angka . ' ' . $huruf);
 
-        // Pre-fill placeholder QR if missing (since we removed input but DB requires it)
-        if (empty($data['kode_qr'])) {
-             // Use a placeholder or unique ID so DB insertion doesn't fail.
-            $data['kode_qr'] = 'PENDING-' . uniqid(); 
-        }
-
         $validated = Validator::make($data, [
-            'kode_qr' => ['nullable', 'string', 'max:255'], // changed from required
             'pemegang' => ['required', 'string', 'max:255'],
             'nip' => ['required', 'string', 'max:255'],
             'jabatan' => ['required', 'string', 'max:255'],
@@ -208,8 +240,7 @@ class KendaraanController extends Controller
             'thn_kendaraan' => ['required', 'integer'],
             'no_rangka' => ['required', 'string', 'max:255'],
             'no_mesin' => ['required', 'string', 'max:255'],
-            'pajak_bulan' => ['required', 'integer', 'between:1,12'],
-            'pajak_tahun' => ['required', 'integer', 'min:2000', 'max:2100'],
+            'pajak_tgl' => ['required', 'date'],
             'jenis' => ['required', 'in:jabatan,operasional'],
             'lokasi' => ['nullable', 'string', 'required_if:jenis,operasional'],
         ], [
@@ -224,8 +255,9 @@ class KendaraanController extends Controller
             'no_polisi_huruf.regex' => 'Huruf belakang harus huruf 1-3 karakter (contoh: AB).',
         ])->validate();
 
-        $validated['pajak'] = sprintf('%04d-%02d', (int) $validated['pajak_tahun'], (int) $validated['pajak_bulan']);
-        unset($validated['pajak_bulan'], $validated['pajak_tahun']);
+        // Store full date YYYY-MM-DD
+        $validated['pajak'] = $validated['pajak_tgl'];
+        unset($validated['pajak_tgl']);
 
         // Handle Jenis Logic
         if ($validated['jenis'] === 'jabatan') {
@@ -245,5 +277,49 @@ class KendaraanController extends Controller
         unset($validated['no_polisi_wilayah'], $validated['no_polisi_angka'], $validated['no_polisi_huruf']);
 
         return $validated;
+    }
+
+    private function generateKodeQR(): string
+    {
+        $part1 = strtoupper(substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, 3));
+        $part2 = strtoupper(substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, 3));
+
+        $kode = "{$part1}-{$part2}";
+
+        while (Kendaraan::where('kode_qr', $kode)->exists()) {
+            $part1 = strtoupper(substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, 3));
+            $part2 = strtoupper(substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, 3));
+            $kode = "{$part1}-{$part2}";
+        }
+
+        return $kode;
+    }
+
+    public function printQr(Kendaraan $kendaraan)
+    {
+        $this->logActivity('Cetak QR', 'Mencetak QR code untuk kendaraan: ' . $kendaraan->no_polisi);
+        return view('operator.kendaraan.print-qr', compact('kendaraan'));
+    }
+
+    public function regenerateQR(Kendaraan $kendaraan)
+    {
+        $kendaraan->update([
+            'kode_qr' => $this->generateKodeQR()
+        ]);
+        
+        $this->logActivity('Regenerate QR', 'Membuat ulang QR Code untuk kendaraan: ' . $kendaraan->no_polisi);
+
+        return redirect()->back()->with('success', 'Kode QR berhasil diperbarui!');
+    }
+
+    private function logActivity($aktivitas, $deskripsi)
+    {
+        ActivityLog::create([
+            'user_id' => Auth::id(),
+            'aktivitas' => $aktivitas,
+            'deskripsi' => $deskripsi,
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+        ]);
     }
 }

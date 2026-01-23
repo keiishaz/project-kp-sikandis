@@ -10,14 +10,14 @@
 
             <div class="form-grid">
                 <div class="form-field">
-                    <label for="name">Username</label>
+                    <label for="name">Nama</label>
                     <input id="name" name="name" value="{{ old('name') }}" required>
                     @error('name')<div class="error-text">{{ $message }}</div>@enderror
                 </div>
                 <div class="form-field">
-                    <label for="email">Email</label>
-                    <input id="email" name="email" type="email" value="{{ old('email') }}" required>
-                    @error('email')<div class="error-text">{{ $message }}</div>@enderror
+                    <label for="nip">NIP</label>
+                    <input id="nip" name="nip" type="text" value="{{ old('nip') }}" required>
+                    @error('nip')<div class="error-text">{{ $message }}</div>@enderror
                 </div>
             </div>
 

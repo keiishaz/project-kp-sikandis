@@ -13,7 +13,7 @@
     --success-color: #16a34a;
     --warning-color: #d97706;
     --danger-color: #dc2626;
-    
+
     /* Neutral Colors */
     --white: #ffffff;
     --gray-50: #f8fafc;
@@ -26,11 +26,11 @@
     --gray-700: #334155;
     --gray-800: #1e293b;
     --gray-900: #0f172a;
-    
+
     /* Layout */
     --sidebar-width: 260px;
     --topbar-height: 64px;
-    
+
     /* Spacing */
     --spacing-xs: 0.5rem;
     --spacing-sm: 0.75rem;
@@ -38,7 +38,7 @@
     --spacing-lg: 1.5rem;
     --spacing-xl: 2rem;
     --spacing-2xl: 3rem;
-    
+
     /* Typography */
     --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     --font-size-xs: 0.75rem;
@@ -48,17 +48,17 @@
     --font-size-xl: 1.25rem;
     --font-size-2xl: 1.5rem;
     --font-size-3xl: 2rem;
-    
+
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    
+
     /* Border Radius */
     --radius-sm: 0.375rem;
     --radius-md: 0.5rem;
     --radius-lg: 0.75rem;
-    
+
     /* Transitions */
     --transition-fast: 150ms ease-in-out;
     --transition-base: 200ms ease-in-out;
@@ -358,13 +358,18 @@ body {
     margin-bottom: var(--spacing-lg);
     padding-bottom: var(--spacing-md);
     border-bottom: 1px solid var(--gray-200);
+    flex-wrap: wrap;
+    /* Allow wrapping on very small screens */
+    gap: var(--spacing-md);
+    /* Add gap for wrapping */
 }
 
 .table-header-actions {
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 8px;
+    align-items: center;
+    /* Center vertically */
+    gap: 0.75rem;
+    /* Gap between buttons */
 }
 
 .table-title {
@@ -428,6 +433,7 @@ body {
 .data-table th.col-actions,
 .data-table td.col-actions {
     text-align: center;
+    vertical-align: middle;
 }
 
 .action-buttons {
@@ -440,6 +446,38 @@ body {
 
 .action-buttons form {
     margin: 0;
+    display: inline-flex;
+    /* Ensure form doesn't block flow */
+}
+
+/* Specific styling for action buttons to remove boxes */
+.btn-action {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 4px;
+    color: var(--gray-600);
+    /* Neutral gray */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.btn-action:hover {
+    background: var(--gray-100);
+    color: var(--primary-color);
+}
+
+.btn-action.btn-delete:hover {
+    background: #fee2e2;
+    color: var(--danger-color);
+}
+
+.btn-action svg {
+    width: 18px;
+    height: 18px;
 }
 
 .data-table th.col-pajak,
@@ -456,10 +494,107 @@ body {
 }
 
 @media (max-width: 768px) {
+
     .data-table th.col-actions,
     .data-table td.col-actions {
         text-align: center;
     }
+}
+
+/* Fixed Column Widths & Layout */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    min-width: 900px;
+    /* Reduced slightly as icons save space, but still enforces scroll */
+}
+
+/* Specific Column Styles */
+.col-pemegang {
+    width: 21%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.col-kendaraan {
+    width: 23%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.vehicle-plate {
+    font-weight: 700;
+    /* Bold as requested */
+    color: var(--gray-800);
+    font-family: 'Courier New', monospace;
+    /* Monospace for nice alignment */
+}
+
+.vehicle-name {
+    font-size: var(--font-size-xs);
+    color: var(--gray-500);
+}
+
+.col-nopol {
+    width: 12%;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.col-jenis {
+    width: 13%;
+    text-align: left;
+    /* Aligned left to match content better */
+    padding-left: var(--spacing-md);
+}
+
+.col-pajak {
+    width: 19%;
+    text-align: center;
+}
+
+.col-actions {
+    width: 12%;
+    /* Reduced width thanks to icons */
+    min-width: 120px;
+    text-align: center;
+}
+
+.action-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: nowrap;
+    /* Force single line */
+}
+
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    color: var(--gray-500);
+    /* Default neutral color */
+    transition: all var(--transition-fast);
+    background: transparent;
+    /* No background by default */
+}
+
+.btn-icon:hover {
+    color: var(--primary-color);
+    background: var(--gray-100);
+}
+
+.btn-icon.text-danger:hover {
+    color: var(--danger-color);
+    background: #fee2e2;
 }
 
 .data-table tbody tr:last-child td {
@@ -508,35 +643,35 @@ body {
         transform: translateX(-100%);
         transition: transform var(--transition-base);
     }
-    
+
     .sidebar.active {
         transform: translateX(0);
     }
-    
+
     .main-wrapper {
         margin-left: 0;
     }
-    
+
     .topbar {
         padding: 0 var(--spacing-md);
     }
-    
+
     .topbar-title {
         font-size: var(--font-size-xl);
     }
-    
+
     .content {
         padding: var(--spacing-md);
     }
-    
+
     .summary-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .table-container {
         overflow-x: auto;
     }
-    
+
     .data-table {
         min-width: 600px;
     }
@@ -797,8 +932,15 @@ body {
 }
 
 @keyframes modalIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .modal-header {
@@ -849,32 +991,33 @@ body {
     background: var(--gray-50);
 }
 
+/* Toolbar Grid Layout */
 .table-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--spacing-md);
     margin-bottom: var(--spacing-lg);
 }
 
-.table-toolbar-left {
-    display: flex;
+.table-toolbar-inner {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: var(--spacing-md);
     align-items: center;
-    gap: var(--spacing-sm);
 }
 
-.table-toolbar-right {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
+@media (max-width: 768px) {
+    .table-toolbar-inner {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-sm);
+    }
 }
 
 .table-toolbar .toolbar-field {
     display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
+    flex-direction: column;
+    /* Label on top if needed, or just block */
+    width: 100%;
 }
 
+.table-toolbar input[type="search"],
 .table-toolbar input[type="text"],
 .table-toolbar select {
     padding: 0.6rem 0.85rem;
@@ -884,6 +1027,16 @@ body {
     color: var(--gray-800);
     outline: none;
     min-width: 220px;
+    height: 42px;
+    /* Fixed height for consistency */
+    font-size: var(--font-size-sm);
+    width: 100%;
+    /* Ensure full width in flex container */
+}
+
+/* Fix search input clear button spacing */
+.table-toolbar input[type="search"]::-webkit-search-cancel-button {
+    margin-left: 0.5rem;
 }
 
 .table-toolbar select {
@@ -1013,20 +1166,109 @@ body {
     }
 }
 
+/* Resizable Columns */
+.resize-handle {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 5px;
+    height: 100%;
+    cursor: col-resize;
+    user-select: none;
+    transition: background-color 0.2s;
+    z-index: 10;
+}
+
+.resize-handle:hover,
+.resize-handle.active {
+    background-color: var(--primary-light);
+}
+
+/* Mobile Card View for Tables */
 @media (max-width: 768px) {
-    .table-toolbar {
-        flex-direction: column;
-        align-items: stretch;
+    .table-container {
+        border: none;
+        box-shadow: none;
+        padding: 0;
+        background: transparent;
+    }
+
+    .table-header {
+        background: var(--white);
+        padding: var(--spacing-md);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        margin-bottom: var(--spacing-md);
     }
 
     .table-toolbar input[type="text"],
     .table-toolbar select {
-        min-width: 100%;
         width: 100%;
+        min-width: 100%;
     }
 
     .pagination-inner {
         flex-direction: column;
         align-items: stretch;
+    }
+
+    /* Force Table to be Cards */
+    .data-table thead {
+        display: none;
+    }
+
+    .data-table,
+    .data-table tbody,
+    .data-table tr,
+    .data-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .data-table tr {
+        background: var(--white);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        margin-bottom: var(--spacing-md);
+        padding: var(--spacing-md);
+        border: 1px solid var(--gray-200);
+    }
+
+    .data-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--spacing-sm) 0;
+        text-align: right;
+        border-bottom: 1px solid var(--gray-100);
+    }
+
+    .data-table td:last-child {
+        border-bottom: none;
+    }
+
+    .data-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: var(--gray-500);
+        margin-right: var(--spacing-md);
+        text-align: left;
+    }
+
+    /* Specific overrides for mobile card cells */
+    .col-kendaraan,
+    .col-pemegang,
+    .col-jenis,
+    .col-pajak,
+    .col-actions {
+        width: 100% !important;
+        /* Override fixed widths */
+        white-space: normal;
+        overflow: visible;
+        text-align: right;
+    }
+
+    .action-buttons {
+        justify-content: flex-end;
     }
 }

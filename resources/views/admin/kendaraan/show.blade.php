@@ -134,9 +134,7 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
                 <div style="background: white; border-radius: 12px; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); padding: 1.5rem; text-align: center;">
                     <h3 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem;">QR Code Identitas</h3>
                     
-                    <div style="background: white; padding: 1rem; border: 1px solid var(--gray-200); border-radius: 8px; display: inline-block; margin-bottom: 1rem;">
                         {!! QrCode::size(160)->style('round')->generate($qrUrl) !!}
-                    </div>
 
                     <p style="font-size: 0.75rem; color: var(--gray-500); margin-bottom: 1.5rem; word-break: break-all;">
                         {{ $qrUrl }}

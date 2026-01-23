@@ -4,27 +4,142 @@
  */
 
 // Wait for DOM to be fully loaded
-document.addEventListener('DOMContentLoaded', function() {
-    
+document.addEventListener('DOMContentLoaded', function () {
+
     // Initialize dashboard
     initDashboard();
-    
+
     // Initialize mobile menu
     initMobileMenu();
-    
+
+    // ... existing code ...
+
     // Initialize active menu highlighting
     initActiveMenu();
 
     initModals();
-    
+
+    // New Initializers
+    initTableSearch();
+    initColumnResize();
+
 });
+
+/**
+ * Real-time Table Search & Filtering (Debounced)
+ */
+function initTableSearch() {
+    const searchInputs = document.querySelectorAll('.table-search-input');
+    const filterSelects = document.querySelectorAll('.table-filter-select');
+
+    let debounceTimer;
+
+    // Search Input Handler
+    // Search Input Handler with Debounce
+    searchInputs.forEach(input => {
+        input.addEventListener('input', function (e) {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                submitTableFilter(input.form);
+            }, 600); // 600ms debounce for better UX
+        });
+
+        // Clear search behavior (x button in input type="search")
+        input.addEventListener('search', function () {
+            if (this.value === '') {
+                submitTableFilter(input.form);
+            }
+        });
+
+        // Ensure input type is search for 'x' clear button
+        input.setAttribute('type', 'search');
+    });
+
+    // Filter Select Handler (Instant)
+    filterSelects.forEach(select => {
+        select.addEventListener('change', function () {
+            submitTableFilter(select.form);
+        });
+    });
+}
+
+function submitTableFilter(form) {
+    if (!form) return;
+
+    // Add loading state opacity to table
+    const tableContainer = document.querySelector('.table-container');
+    if (tableContainer) {
+        tableContainer.style.opacity = '0.6';
+        tableContainer.style.pointerEvents = 'none';
+
+        // Show loading indicator if desired
+        // const loader = document.createElement('div'); ...
+    }
+
+    form.submit();
+}
+
+/**
+ * Table Column Resizing
+ */
+function initColumnResize() {
+    const tables = document.querySelectorAll('.data-table');
+
+    tables.forEach(table => {
+        const headers = table.querySelectorAll('th');
+
+        headers.forEach(th => {
+            // Skip action column
+            if (th.classList.contains('col-actions')) return;
+
+            // Check if handle already exists to avoid duplicates
+            if (th.querySelector('.resize-handle')) return;
+
+            // Create handle
+            const handle = document.createElement('div');
+            handle.classList.add('resize-handle');
+            th.appendChild(handle);
+
+            // Resizing logic
+            let startX, startWidth;
+
+            handle.addEventListener('mousedown', function (e) {
+                e.preventDefault();
+                startX = e.pageX;
+                startWidth = th.offsetWidth;
+
+                handle.classList.add('active');
+                document.body.style.cursor = 'col-resize'; // Global cursor
+
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+            });
+
+            function onMouseMove(e) {
+                const diff = e.pageX - startX;
+                const newWidth = startWidth + diff;
+                if (newWidth > 60) { // Min width 60px
+                    th.style.width = newWidth + 'px';
+                }
+            }
+
+            function onMouseUp() {
+                handle.classList.remove('active');
+                document.body.style.cursor = ''; // Reset cursor
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            }
+        });
+    });
+}
 
 /**
  * Initialize Dashboard
  */
 function initDashboard() {
+    // ... existing code ...
     console.log('SIKANDIS Dashboard initialized');
-    
+
     // Add smooth scroll behavior
     document.documentElement.style.scrollBehavior = 'smooth';
 }
@@ -71,17 +186,17 @@ function initModals() {
 function initMobileMenu() {
     const mobileToggle = document.getElementById('mobile-toggle');
     const sidebar = document.querySelector('.sidebar');
-    
+
     if (mobileToggle && sidebar) {
-        mobileToggle.addEventListener('click', function() {
+        mobileToggle.addEventListener('click', function () {
             sidebar.classList.toggle('active');
         });
-        
+
         // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', function(event) {
+        document.addEventListener('click', function (event) {
             const isClickInsideSidebar = sidebar.contains(event.target);
             const isClickOnToggle = mobileToggle.contains(event.target);
-            
+
             if (!isClickInsideSidebar && !isClickOnToggle && sidebar.classList.contains('active')) {
                 sidebar.classList.remove('active');
             }
@@ -95,13 +210,13 @@ function initMobileMenu() {
 function initActiveMenu() {
     const navLinks = document.querySelectorAll('.nav-link');
     const currentPath = window.location.pathname;
-    
+
     navLinks.forEach(link => {
         // Remove active class from all links
         link.classList.remove('active');
-        
+
         // Add active class to current page link
-        if (link.getAttribute('href') === currentPath || 
+        if (link.getAttribute('href') === currentPath ||
             (currentPath === '/' && link.getAttribute('href') === '#dashboard')) {
             link.classList.add('active');
         }
@@ -129,12 +244,12 @@ function updateSummaryCard(cardId, newValue) {
             const duration = 500; // ms
             const steps = Math.abs(newValue - currentValue);
             const stepDuration = duration / steps;
-            
+
             let current = currentValue;
             const timer = setInterval(() => {
                 current += increment;
                 valueElement.textContent = current;
-                
+
                 if (current === newValue) {
                     clearInterval(timer);
                 }

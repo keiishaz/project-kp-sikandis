@@ -12,24 +12,19 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 <body>
 
     <div class="no-print">
-        <a href="{{ route('admin.kendaraan.index') }}" class="btn-back">Kembali</a>
+        <a href="{{ route('operator.kendaraan.index') }}" class="btn-back">Kembali</a>
         <button id="printBtn" class="btn-print">Cetak Stiker</button>
     </div>
 
     <div class="sticker-card">
-        <div class="sticker-header">
-            <img src="{{ asset('assets/images/logobkl.png') }}" alt="Logo Pemkot" class="sticker-logo">
-            <div class="sticker-title">PEMERINTAH KOTA BENGKULU</div>
-        </div>
-
         <div class="qr-area">
             <div class="qr-wrapper">
                 {!! QrCode::size(200)->style('round')->generate(url($kendaraan->kode_qr)) !!}
             </div>
         </div>
 
-        <div class="sticker-footer">
-            <div class="sticker-nopol">{{ $kendaraan->no_polisi }}</div>
+        <div class="card-footer">
+            <div class="app-brand">ASET KENDARAAN DINAS</div>
         </div>
     </div>
 

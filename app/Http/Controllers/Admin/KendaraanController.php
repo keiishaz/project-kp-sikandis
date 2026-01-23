@@ -31,26 +31,31 @@ class KendaraanController extends Controller
 
         if ($status === 'aktif') {
             $driver = DB::connection()->getDriverName();
+            // Logic: If pajak is YYYY-MM, treat as YYYY-MM-01. If YYYY-MM-DD, use as is.
             if ($driver === 'sqlite') {
-                $query->whereRaw("date(pajak || '-01') >= date('now','start of month')");
+                 $query->whereRaw("date(CASE WHEN length(pajak) = 7 THEN pajak || '-01' ELSE pajak END) >= date('now','start of month')");
             } elseif ($driver === 'pgsql') {
-                $query->whereRaw("to_date(pajak || '-01', 'YYYY-MM-DD') >= date_trunc('month', now())::date");
+                 $query->whereRaw("to_date(CASE WHEN length(pajak) = 7 THEN pajak || '-01' ELSE pajak END, 'YYYY-MM-DD') >= date_trunc('month', now())::date");
             } else {
-                $query->whereRaw("STR_TO_DATE(CONCAT(pajak,'-01'), '%Y-%m-%d') >= DATE_FORMAT(CURDATE(), '%Y-%m-01')");
+                 // MySQL/MariaDB
+                 $query->whereRaw("STR_TO_DATE(IF(LENGTH(pajak)=7, CONCAT(pajak, '-01'), pajak), '%Y-%m-%d') >= DATE_FORMAT(CURDATE(), '%Y-%m-01')");
             }
         } elseif ($status === 'mati') {
             $driver = DB::connection()->getDriverName();
             if ($driver === 'sqlite') {
-                $query->whereRaw("date(pajak || '-01') < date('now','start of month')");
+                 $query->whereRaw("date(CASE WHEN length(pajak) = 7 THEN pajak || '-01' ELSE pajak END) < date('now','start of month')");
             } elseif ($driver === 'pgsql') {
-                $query->whereRaw("to_date(pajak || '-01', 'YYYY-MM-DD') < date_trunc('month', now())::date");
+                 $query->whereRaw("to_date(CASE WHEN length(pajak) = 7 THEN pajak || '-01' ELSE pajak END, 'YYYY-MM-DD') < date_trunc('month', now())::date");
             } else {
-                $query->whereRaw("STR_TO_DATE(CONCAT(pajak,'-01'), '%Y-%m-%d') < DATE_FORMAT(CURDATE(), '%Y-%m-01')");
+                 $query->whereRaw("STR_TO_DATE(IF(LENGTH(pajak)=7, CONCAT(pajak, '-01'), pajak), '%Y-%m-%d') < DATE_FORMAT(CURDATE(), '%Y-%m-01')");
             }
         } elseif ($status === 'hampir_habis') {
+            // For almost expired, we check if the date falls in current or next month.
+            // Converting both DB value and range to YYYY-MM for comparison is easiest safely.
+            // SUBSTR(pajak, 1, 7) gets YYYY-MM from YYYY-MM-DD or YYYY-MM
             $currentMonth = now()->format('Y-m');
             $nextMonth = now()->addMonth()->format('Y-m');
-            $query->whereIn('pajak', [$currentMonth, $nextMonth]);
+            $query->whereRaw("SUBSTR(pajak, 1, 7) IN (?, ?)", [$currentMonth, $nextMonth]);
         }
 
         $allowedSorts = ['created_at', 'kode_qr', 'nama_kendaraan', 'no_polisi', 'jenis', 'pemegang', 'pajak'];
@@ -228,8 +233,7 @@ class KendaraanController extends Controller
             'thn_kendaraan' => ['required', 'integer'],
             'no_rangka' => ['required', 'string', 'max:255'],
             'no_mesin' => ['required', 'string', 'max:255'],
-            'pajak_bulan' => ['required', 'integer', 'between:1,12'],
-            'pajak_tahun' => ['required', 'integer', 'min:2000', 'max:2100'],
+            'pajak_tgl' => ['required', 'date'],
             'jenis' => ['required', 'in:jabatan,operasional'],
             'lokasi' => ['nullable', 'string', 'required_if:jenis,operasional'],
         ], [
@@ -244,8 +248,9 @@ class KendaraanController extends Controller
             'no_polisi_huruf.regex' => 'Huruf belakang harus huruf 1-3 karakter (contoh: AB).',
         ])->validate();
 
-        $validated['pajak'] = sprintf('%04d-%02d', (int) $validated['pajak_tahun'], (int) $validated['pajak_bulan']);
-        unset($validated['pajak_bulan'], $validated['pajak_tahun']);
+        // Store full date YYYY-MM-DD
+        $validated['pajak'] = $validated['pajak_tgl'];
+        unset($validated['pajak_tgl']);
 
         // Handle Jenis Logic
         if ($validated['jenis'] === 'jabatan') {

@@ -50,55 +50,81 @@ body {
     width: 380px;
     background: white;
     border: 4px double #000;
-    padding: 24px;
+    padding: 20px;
     position: relative;
-    background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
-    background-size: 12px 12px;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
 }
 
-.sticker-card::before {
-    content: '';
-    position: absolute;
-    inset: 6px;
-    border: 1px solid #000;
-    pointer-events: none;
+.sticker-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 5px;
+    width: 100%;
+    justify-content: center;
+    border-bottom: 2px solid #000;
+    padding-bottom: 10px;
+}
+
+.sticker-logo {
+    width: 40px;
+    height: auto;
+}
+
+.sticker-title {
+    font-size: 0.9rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #000;
+    letter-spacing: 0.05em;
+    text-align: center;
+    line-height: 1.2;
 }
 
 .qr-area {
     display: flex;
     justify-content: center;
-    margin-bottom: 16px;
-    position: relative;
-    z-index: 1;
+    width: 100%;
+    margin: 5px 0;
 }
 
 .qr-wrapper {
     background: white;
-    padding: 12px;
+    padding: 8px;
     border: 2px solid #000;
     border-radius: 8px;
 }
 
-.card-footer {
+.sticker-footer {
+    width: 100%;
     text-align: center;
-    position: relative;
-    z-index: 1;
+    border-top: 2px solid #000;
+    padding-top: 5px;
 }
 
-.app-brand {
-    font-size: 0.7rem;
-    margin-top: 12px;
-    color: #6b7280;
-    font-weight: 500;
+.sticker-nopol {
+    font-size: 1.8rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    color: #000;
     letter-spacing: 0.1em;
+    font-family: 'Courier New', monospace;
+    /* Monospace for license plate look */
 }
 
 @media print {
     body {
         background: none;
-        display: block;
-        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        padding: 0;
+        margin: 0;
     }
 
     .no-print {
@@ -109,6 +135,7 @@ body {
         box-shadow: none;
         margin: 0;
         background-image: none;
-        /* Cleaner print */
+        border: 4px double #000;
+        /* Ensure border prints */
     }
 }

@@ -15,28 +15,19 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $validated = $request->validate([
-            'login' => ['required', 'string'],
+            'nip' => ['required', 'string'],
             'password' => ['required'],
         ]);
 
-        $login = $validated['login'];
-        $password = $validated['password'];
-
-        $attempted = false;
-
-        if (filter_var($login, FILTER_VALIDATE_EMAIL)) {
-            $attempted = Auth::attempt(['email' => $login, 'password' => $password]);
-        } else {
-            $attempted = Auth::attempt(['name' => $login, 'password' => $password]);
-            if (!$attempted) {
-                $attempted = Auth::attempt(['email' => $login, 'password' => $password]);
-            }
-        }
+        $attempted = Auth::attempt([
+            'nip' => $validated['nip'],
+            'password' => $validated['password']
+        ]);
 
         if (!$attempted) {
             return back()->withErrors([
-                'login' => 'Username/email atau password salah.',
-            ])->onlyInput('login');
+                'nip' => 'NIP atau password salah.',
+            ])->onlyInput('nip');
         }
 
         $request->session()->regenerate();
