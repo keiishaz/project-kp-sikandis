@@ -30,15 +30,11 @@ class KendaraanController extends Controller
             });
         }
 
-        // Jenis filter
         if (is_string($jenis) && trim($jenis) !== '') {
             $query->where('jenis', 'like', '%' . trim($jenis) . '%');
         }
 
-        // Status filtering - use get() + filter for hampir_habis, otherwise use query builder
         if ($status === 'hampir_habis') {
-            // For "almost expired", we need to use model accessors
-            // Get all matching records first, then filter using accessors
             $allowedSorts = ['created_at', 'kode_qr', 'nama_kendaraan', 'no_polisi', 'jenis', 'pemegang', 'pajak'];
             $direction = in_array($dir, ['asc', 'desc'], true) ? $dir : 'desc';
 
@@ -48,15 +44,12 @@ class KendaraanController extends Controller
                 $query->latest();
             }
 
-            // Get all results first
             $allResults = $query->get();
             
-            // Filter using accessor
             $filtered = $allResults->filter(function($k) {
                 return $k->pajak_is_expiring_soon && $k->pajak_is_active;
             });
 
-            // Manually paginate the filtered collection
             $perPage = 15;
             $currentPage = request()->get('page', 1);
             $offset = ($currentPage - 1) * $perPage;
@@ -71,9 +64,7 @@ class KendaraanController extends Controller
                 ['path' => request()->url(), 'query' => request()->query()]
             );
         } else {
-            // For aktif/mati, use query builder logic (already accurate from Model)
             if ($status === 'aktif' || $status === 'mati') {
-                // Get all and filter using accessor
                 $allResults = $query->get();
                 
                 if ($status === 'aktif') {
@@ -82,7 +73,6 @@ class KendaraanController extends Controller
                     $filtered = $allResults->filter(fn($k) => !$k->pajak_is_active);
                 }
 
-                // Manually paginate
                 $perPage = 15;
                 $currentPage = request()->get('page', 1);
                 $offset = ($currentPage - 1) * $perPage;
@@ -97,7 +87,6 @@ class KendaraanController extends Controller
                     ['path' => request()->url(), 'query' => request()->query()]
                 );
             } else {
-                // No status filter
                 $allowedSorts = ['created_at', 'kode_qr', 'nama_kendaraan', 'no_polisi', 'jenis', 'pemegang', 'pajak'];
                 $direction = in_array($dir, ['asc', 'desc'], true) ? $dir : 'desc';
 
@@ -331,10 +320,9 @@ class KendaraanController extends Controller
     }
 
     public function printQr(Kendaraan $kendaraan)
-{
-    return view('admin.kendaraan.print-qr', compact('kendaraan'));
-}
-
+    {
+        return view('admin.kendaraan.print-qr', compact('kendaraan'));
+    }
 
     public function regenerateQR(Kendaraan $kendaraan)
     {

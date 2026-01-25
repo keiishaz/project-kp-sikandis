@@ -176,39 +176,35 @@
     </div>
 
     <style>
-        /* Dashboard Specific Grid */
         .dashboard-grid {
             display: grid;
-            grid-template-columns: 1fr 2fr; /* Activity Log (1fr) on left, Vehicles (2fr) on right */
+            grid-template-columns: 1fr 2fr;
             gap: var(--spacing-lg);
-            align-items: stretch; /* Cards stretch to equal height */
+            align-items: stretch;
         }
 
-        /* Card components */
         .dashboard-grid .table-container {
             display: flex;
             flex-direction: column;
             margin-bottom: 0;
-            height: 420px; /* FIXED height according to user (fits 3 rows perfectly) */
+            height: 420px; 
         }
 
-        /* Activity Log Scrollable Area */
         .activity-log-container {
-            min-width: 0; /* Prevents flex/grid overflow */
+            min-width: 0; 
         }
 
         .activity-list {
             display: flex;
             flex-direction: column;
             gap: 1rem;
-            flex: 1; /* Fills remaining space in the card */
-            overflow-y: auto; /* Scroll if content exceeds height */
+            flex: 1;
+            overflow-y: auto;
             padding-right: 0.5rem;
-            min-height: 0; /* Allows shrinking below content size */
-            height: 0; /* Ensures it doesn't push the parent height, follows the flex grow instead */
+            min-height: 0;
+            height: 0; 
         }
 
-        /* Custom scrollbar styling */
         .activity-list::-webkit-scrollbar {
             width: 6px;
         }
@@ -272,7 +268,7 @@
             font-size: 0.75rem;
             color: var(--gray-500);
             display: flex;
-            flex-direction: column; /* Stack vertically */
+            flex-direction: column; 
             gap: 0.125rem;
         }
 
@@ -287,7 +283,7 @@
         }
 
         .separator {
-            display: none; /* Hide separator */
+            display: none;
         }
     </style>
 @endsection

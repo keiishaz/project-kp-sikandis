@@ -29,7 +29,6 @@ Route::prefix('admin')
         Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
         
         Route::get('/activity-logs', [AdminActivityLogController::class, 'index'])->name('activity_logs.index');
-
         Route::get('kendaraan/export-excel', [AdminKendaraanController::class, 'exportExcel'])->name('kendaraan.export');
         Route::post('kendaraan/{kendaraan}/regenerate-qr', [AdminKendaraanController::class, 'regenerateQr'])->name('kendaraan.regenerate');
         Route::get('kendaraan/{kendaraan}/print-qr', [AdminKendaraanController::class, 'printQr'])->name('kendaraan.print');

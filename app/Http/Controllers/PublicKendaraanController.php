@@ -13,7 +13,7 @@ class PublicKendaraanController extends Controller
         $kendaraan = Kendaraan::where('kode_qr', $kode_qr)->first();
 
         if (!$kendaraan) {
-            abort(404, 'Data kendaraan tidak ditemukan.');
+            return view('umum.not-found');
         }
 
         return view('umum.public', compact('kendaraan'));

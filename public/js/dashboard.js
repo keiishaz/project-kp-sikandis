@@ -274,10 +274,113 @@ function handleTableRowClick(vehicleId) {
     // Future: Navigate to detail page or show modal
 }
 
+/**
+ * Global Confirmation Modal Logic
+ */
+let confirmCallback = null;
+
+function showConfirm(options = {}) {
+    const modal = document.getElementById('sikandis-confirm-modal');
+    const titleEl = document.getElementById('confirm-modal-title');
+    const messageEl = document.getElementById('confirm-modal-message');
+    const btnConfirm = document.getElementById('confirm-btn-confirm');
+    const btnCancel = document.getElementById('confirm-btn-cancel');
+    const iconContainer = modal.querySelector('.confirm-icon');
+
+    // Reset styles
+    iconContainer.className = 'confirm-icon ' + (options.type || 'danger');
+
+    // Set content
+    titleEl.textContent = options.title || 'Konfirmasi';
+    messageEl.textContent = options.message || 'Apakah Anda yakin ingin melanjutkan?';
+    btnConfirm.textContent = options.confirmText || 'Ya, Lanjutkan';
+    btnCancel.textContent = options.cancelText || 'Batal';
+
+    // Show modal
+    modal.classList.add('active');
+
+    // Handle actions
+    return new Promise((resolve) => {
+        const handleConfirm = () => {
+            modal.classList.remove('active');
+            cleanup();
+            resolve(true);
+        };
+
+        const handleCancel = () => {
+            modal.classList.remove('active');
+            cleanup();
+            resolve(false);
+        };
+
+        const cleanup = () => {
+            btnConfirm.removeEventListener('click', handleConfirm);
+            btnCancel.removeEventListener('click', handleCancel);
+        };
+
+        btnConfirm.addEventListener('click', handleConfirm);
+        btnCancel.addEventListener('click', handleCancel);
+    });
+}
+
+/**
+ * Intercept forms/links that use onclick="return confirm(...)"
+ */
+function initBetterConfirms() {
+    // Intercept forms using specific action buttons
+    document.addEventListener('submit', async function (e) {
+        const form = e.target;
+        const submitter = e.submitter;
+
+        if (!submitter) return;
+
+        // Pattern for Delete actions
+        const isDelete = submitter.classList.contains('btn-delete') || submitter.closest('.btn-delete');
+
+        // Pattern for Warning actions (like Regenerate QR)
+        const isWarning = submitter.classList.contains('btn-warning') || submitter.closest('.btn-warning');
+
+        if (isDelete || isWarning) {
+            if (form.dataset.confirmed) return; // Allow submit if already confirmed
+
+            e.preventDefault();
+
+            let options = {
+                type: isDelete ? 'danger' : 'warning',
+                title: isDelete ? 'Hapus Data?' : 'Konfirmasi Tindakan',
+                message: 'Apakah Anda yakin ingin melanjutkan?',
+                confirmText: isDelete ? 'Ya, Hapus' : 'Ya, Lanjutkan'
+            };
+
+            // Custom messages based on context
+            if (isDelete) {
+                options.message = 'Data ini akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.';
+            } else if (submitter.innerText.toLowerCase().includes('regenerate')) {
+                options.title = 'Regenerate QR Code?';
+                options.message = 'QR Code lama tidak akan berfungsi lagi setelah Anda membuat yang baru.';
+                options.confirmText = 'Ya, Regenerate';
+                options.type = 'warning';
+            }
+
+            const confirmed = await showConfirm(options);
+
+            if (confirmed) {
+                form.dataset.confirmed = "true";
+                form.submit();
+            }
+        }
+    });
+}
+
+// Initialize better confirms
+initBetterConfirms();
+
 // Export functions for global use if needed
 window.SIKANDIS = {
     formatNumber,
     updateSummaryCard,
     showNotification,
-    handleTableRowClick
+    handleTableRowClick,
+    confirm: showConfirm
 };
+

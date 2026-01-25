@@ -128,6 +128,27 @@
         </main>
     </div>
 
+    <!-- Global Confirmation Modal -->
+    <div id="sikandis-confirm-modal" class="modal-overlay">
+        <div class="modal modal-confirm" role="dialog" aria-modal="true">
+            <div class="modal-body text-center">
+                <div class="confirm-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
+                <h3 class="confirm-title" id="confirm-modal-title">Konfirmasi</h3>
+                <p class="confirm-message" id="confirm-modal-message">Apakah Anda yakin ingin melanjutkan tindakan ini?</p>
+                <div class="confirm-actions">
+                    <button type="button" class="btn btn-outline" id="confirm-btn-cancel">Batal</button>
+                    <button type="button" class="btn btn-danger" id="confirm-btn-confirm">Ya, Lanjutkan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="{{ asset('js/dashboard.js') }}"></script>
 </body>
 </html>

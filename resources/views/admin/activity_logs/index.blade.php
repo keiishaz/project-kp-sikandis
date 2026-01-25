@@ -30,7 +30,7 @@
                                 <div style="font-weight: 600;">{{ $log->user->name }}</div>
                                 <div style="font-size: 0.75rem; color: var(--gray-500);">NIP: {{ $log->user->nip }}</div>
                             @else
-                                <span style="color: var(--gray-400); font-style: italic;">Hamba Allah</span>
+                                <span style="color: var(--gray-400); font-style: italic;">User Tidak Ditemukan</span>
                             @endif
                         </td>
                         <td>

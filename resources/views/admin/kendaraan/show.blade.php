@@ -146,7 +146,7 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
                             Cetak Stiker QR
                         </a>
 
-                        <form action="{{ route('admin.kendaraan.regenerate', $kendaraan) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin membuat ulang QR Code? QR Code lama tidak akan berfungsi lagi.');">
+                        <form action="{{ route('admin.kendaraan.regenerate', $kendaraan) }}" method="POST">
                             @csrf
                             <button type="submit" class="btn btn-warning" style="width: 100%; justify-content: center; font-size: 0.8rem; padding: 0.6rem;">
                                 Regenerate QR Baru

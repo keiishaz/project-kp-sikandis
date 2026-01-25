@@ -359,17 +359,13 @@ body {
     padding-bottom: var(--spacing-md);
     border-bottom: 1px solid var(--gray-200);
     flex-wrap: wrap;
-    /* Allow wrapping on very small screens */
     gap: var(--spacing-md);
-    /* Add gap for wrapping */
 }
 
 .table-header-actions {
     display: flex;
     align-items: center;
-    /* Center vertically */
     gap: 0.75rem;
-    /* Gap between buttons */
 }
 
 .table-title {
@@ -447,10 +443,8 @@ body {
 .action-buttons form {
     margin: 0;
     display: inline-flex;
-    /* Ensure form doesn't block flow */
 }
 
-/* Specific styling for action buttons to remove boxes */
 .btn-action {
     border: none;
     background: transparent;
@@ -458,7 +452,6 @@ body {
     padding: 6px;
     border-radius: 4px;
     color: var(--gray-600);
-    /* Neutral gray */
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -501,16 +494,13 @@ body {
     }
 }
 
-/* Fixed Column Widths & Layout */
 .data-table {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
     min-width: 900px;
-    /* Reduced slightly as icons save space, but still enforces scroll */
 }
 
-/* Specific Column Styles */
 .col-pemegang {
     width: 21%;
     white-space: nowrap;
@@ -527,10 +517,8 @@ body {
 
 .vehicle-plate {
     font-weight: 700;
-    /* Bold as requested */
     color: var(--gray-800);
     font-family: 'Courier New', monospace;
-    /* Monospace for nice alignment */
 }
 
 .vehicle-name {
@@ -547,7 +535,6 @@ body {
 .col-jenis {
     width: 13%;
     text-align: left;
-    /* Aligned left to match content better */
     padding-left: var(--spacing-md);
 }
 
@@ -558,7 +545,6 @@ body {
 
 .col-actions {
     width: 12%;
-    /* Reduced width thanks to icons */
     min-width: 120px;
     text-align: center;
 }
@@ -569,7 +555,6 @@ body {
     justify-content: center;
     gap: 6px;
     flex-wrap: nowrap;
-    /* Force single line */
 }
 
 .btn-icon {
@@ -581,10 +566,8 @@ body {
     justify-content: center;
     border-radius: var(--radius-sm);
     color: var(--gray-500);
-    /* Default neutral color */
     transition: all var(--transition-fast);
     background: transparent;
-    /* No background by default */
 }
 
 .btn-icon:hover {
@@ -613,7 +596,6 @@ body {
     background-color: rgba(59, 130, 246, 0.08);
 }
 
-/* Status Badge */
 .status-badge {
     display: inline-block;
     padding: 0.375rem 0.75rem;
@@ -1013,7 +995,6 @@ body {
 .table-toolbar .toolbar-field {
     display: flex;
     flex-direction: column;
-    /* Label on top if needed, or just block */
     width: 100%;
 }
 
@@ -1028,13 +1009,10 @@ body {
     outline: none;
     min-width: 220px;
     height: 42px;
-    /* Fixed height for consistency */
     font-size: var(--font-size-sm);
     width: 100%;
-    /* Ensure full width in flex container */
 }
 
-/* Fix search input clear button spacing */
 .table-toolbar input[type="search"]::-webkit-search-cancel-button {
     margin-left: 0.5rem;
 }
@@ -1271,4 +1249,77 @@ body {
     .action-buttons {
         justify-content: flex-end;
     }
+}
+
+/* ========================================
+   CUSTOM CONFIRMATION MODAL
+   ======================================== */
+
+#sikandis-confirm-modal .modal-confirm {
+    max-width: 400px !important;
+    padding: 2.5rem !important;
+    border-radius: 1.25rem !important;
+    background: var(--white);
+    border: none;
+    box-shadow: var(--shadow-lg);
+}
+
+.confirm-icon {
+    width: 72px;
+    height: 72px;
+    background-color: #fee2e2;
+    color: #ef4444;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+}
+
+.confirm-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.01em;
+}
+
+.confirm-message {
+    font-size: 0.95rem;
+    color: var(--gray-600);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.confirm-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.confirm-actions .btn {
+    padding: 0.875rem !important;
+    font-weight: 600 !important;
+    font-size: 0.875rem !important;
+    border-radius: var(--radius-md) !important;
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* Specific colors for confirm icons based on context */
+.confirm-icon.warning {
+    background-color: #fef3c7;
+    color: #d97706;
+}
+
+.confirm-icon.danger {
+    background-color: #fee2e2;
+    color: #ef4444;
+}
+
+.confirm-icon.info {
+    background-color: #eff6ff;
+    color: #3b82f6;
 }

@@ -112,7 +112,7 @@
                                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                                         </svg>
                                     </a>
-                                    <form action="{{ route('operator.kendaraan.destroy', $k) }}" method="POST" style="display:inline;" onsubmit="return confirm('Hapus data kendaraan ini?');">
+                                    <form action="{{ route('operator.kendaraan.destroy', $k) }}" method="POST" style="display:inline;">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn-action btn-delete" title="Hapus">
