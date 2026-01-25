@@ -187,7 +187,7 @@ class KendaraanController extends Controller
             $html .= "<td>" . $esc($k->pajak_label) . "</td>";
             $html .= "<td>" . $esc($k->pajak_is_active ? 'Aktif' : 'Tidak Aktif') . "</td>";
             $html .= "<td>" . $esc($k->pemegang) . "</td>";
-            $html .= "<td>" . $esc($k->nip) . "</td>";
+            $html .= '<td style="mso-number-format:\'\@\';">' . $esc($k->nip) . "</td>";
             $html .= "<td>" . $esc($k->jabatan) . "</td>";
             $html .= "<td>" . $esc($k->unit_kerja) . "</td>";
             $html .= "<td>" . $esc($k->no_rangka) . "</td>";
